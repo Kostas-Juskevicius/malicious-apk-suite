@@ -59,7 +59,7 @@ BASE64_PATTERNS = [
     r"getEncoder\(\)",
     r'aHR0cDovL2',  # http:// in base64
     r'aHR0cHM6Ly9',  # https:// in base64
-    r'[a-zA-Z0-9+/]*=="',  # any b64 strings 
+    r'[a-zA-Z0-9+/]{5,}={1,}',  # b64 strings 
 ]
 
 HARDCODED_KEYS = [
@@ -165,6 +165,10 @@ PERSISTENCE_PATTERNS = [
     r"onStartCommand",
     r"AlarmManager",
     r"setRepeating",
+]
+
+IMAGE_PAYLOAD_PATTERNS = [
+    r"getPixel",
 ]
 
 
