@@ -175,7 +175,7 @@ IMAGE_PAYLOAD_PATTERNS = [
 
 def grep_and_print(label, patterns):
     print(f"[*] GREPPING FOR {label}...")
-    cmd = ["rg", "--json", "--type", "java"]
+    cmd = ["rg", "--json", "--type", "java", "-P"]
     for p in patterns:
         cmd.extend(["-e", p])
     cmd.append(SOURCES_DIR)
@@ -203,7 +203,7 @@ def grep_and_print(label, patterns):
                 print(f"[*] FOUND {label}: {m['lines']['text'].strip()} in {filepath} at line {m['line_number']}")
         except:
             continue
-    print("\n")
+    print()
 
 
 LABELS = [
