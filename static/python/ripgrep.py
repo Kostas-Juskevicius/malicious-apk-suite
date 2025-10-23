@@ -155,7 +155,7 @@ STRINGS_PATTERNS = [
     r"wss://",
     r"ftp://",
     r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",  # IP addresses
-    r"[a-zA-Z0-9-]+\.(com|net|org|io|xyz|ru|cn|onion)",  # domains
+    r"[a-zA-Z0-9-]+\.(com|net|org|io|xyz|ru|cn|onion)\b",  # domains
 ]
 
 PERSISTENCE_PATTERNS = [
