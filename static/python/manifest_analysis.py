@@ -49,7 +49,7 @@ DANGEROUS_PERMISSIONS = [
 
 tree = etree.parse("jadx/resources/AndroidManifest.xml")
 root = tree.getroot()
-package = root.get("package") # for this "." case: https://developer.android.com/guide/topics/manifest/manifest-intro#components
+package = root.get("package") # for this prefixed ".ClassName" case: https://developer.android.com/guide/topics/manifest/manifest-intro#components
 ns = {"android": "http://schemas.android.com/apk/res/android"}
 
 

@@ -19,7 +19,7 @@ import sys
 # the difficulty is in determining that its in fact "1111" - maybe long substrings repeating 3+ times in a line?
 
 
-SOURCES_DIR = sys.argv[1] if len(sys.argv) > 1 else sys.exit("[*] ERROR: you must pass the path to jadx of sources as the first arg.")
+SOURCES_DIR = sys.argv[1] if len(sys.argv) > 1 else sys.exit("[*] ERROR: you must pass the path to jadx output of sources as the first arg.")
 
 
 SKIP_PACKAGES = [
@@ -59,6 +59,7 @@ BASE64_PATTERNS = [
     r"getEncoder\(\)",
     r'aHR0cDovL2',  # http:// in base64
     r'aHR0cHM6Ly9',  # https:// in base64
+    r'[a-zA-Z0-9+/]*=="',  # any b64 strings 
 ]
 
 HARDCODED_KEYS = [
@@ -82,7 +83,7 @@ SMS_PATTERNS = [
 ]
 
 ACCESSIBILITY_PATTERNS = [
-    r"AccessibilityService",
+    r"AccessibilityService\b",
     r"TYPE_ACCESSIBILITY_OVERLAY",
     r"TYPE_APPLICATION_OVERLAY",
     r"SYSTEM_ALERT_WINDOW",
@@ -91,7 +92,7 @@ ACCESSIBILITY_PATTERNS = [
 ]
 
 OBFUSCATION_PATTERNS = [
-    r'[a-zA-Z0-9]\s*==\s*"',  # a== "something"
+    r"String\s+\w+\s*=\s*\"[^\"]*\"\s*\+\s*\"[^\"]*\"\s*\+", # string concatenation
     r'"\s*\+\s*"',  # string concatenation
 ]
 
@@ -137,7 +138,8 @@ FILE_OPS_PATTERNS = [
 ]
 
 NATIVE_PATTERNS = [
-    r"System\.loadLibrary\(",
+    r"System\.loadLibrary\(['\"](?!.*(?:firebase|gms))[^'\"]+['\"]\)",  # exclude firebase/gms
+    r"public\s+(?:static\s+)?native\s+",
     r"\.so",
     r"native\s+\w+\s+\w+\(",
 ]
@@ -146,7 +148,18 @@ LOGGING_PATTERNS = [
     r"Log\.[a-z]\(",  # Log.d(, Log.e(, etc
 ]
 
+STRINGS_PATTERNS = [
+    r"http://",
+    r"https://",
+    r"ws://",
+    r"wss://",
+    r"ftp://",
+    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",  # IP addresses
+    r"[a-zA-Z0-9-]+\.(com|net|org|io|xyz|ru|cn|onion)",  # domains
+]
+
 PERSISTENCE_PATTERNS = [
+    r"AlarmManager\.setRepeating",
     r"START_STICKY",
     r"BOOT_COMPLETED",
     r"onStartCommand",
@@ -203,6 +216,7 @@ LABELS = [
     ("FILE_OPS", FILE_OPS_PATTERNS),
     ("NATIVE", NATIVE_PATTERNS),
     ("LOG", LOGGING_PATTERNS),
+    ("STRING", STRINGS_PATTERNS),
     ("PERSISTENCE", PERSISTENCE_PATTERNS),
 ]
 

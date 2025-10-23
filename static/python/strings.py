@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-
-# TODO: maybe should look at all files rather than at a whitelist of them?
-# TODO: maybe some of this should synergize with the steganography.py script, maybe that one finds hidden bins in non-bin files and passes them here?
-
 import subprocess
 import sys
 import os
+
+
+# TODO: maybe should look at all files rather than at a whitelist of them?
+# TODO: maybe some of this should synergize with the steganography.py script, maybe that one finds hidden bins in non-bin files and passes them here?
 
 
 RES_DIR = sys.argv[1] if len(sys.argv) > 1 else sys.exit("[*] ERROR: you must pass the path to jadx output of resources as the first arg.")
