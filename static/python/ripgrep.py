@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import subprocess
-import json
 import sys
 
 
@@ -141,22 +140,11 @@ FILE_OPS_PATTERNS = [
 NATIVE_PATTERNS = [
     r"System\.loadLibrary\(['\"](?!.*(?:firebase|gms))[^'\"]+['\"]\)",  # exclude firebase/gms
     r"public\s+(?:static\s+)?native\s+",
-    r"\.so",
     r"native\s+\w+\s+\w+\(",
 ]
 
 LOGGING_PATTERNS = [
     r"Log\.[a-z]\(",  # Log.d(, Log.e(, etc
-]
-
-STRINGS_PATTERNS = [
-    r"http://",
-    r"https://",
-    r"ws://",
-    r"wss://",
-    r"ftp://",
-    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",  # IP addresses
-    r"(?<!\.)[a-zA-Z0-9-]+\.(com|net|org|io|xyz|ru|cn|onion)(?!\.)",  # domains
 ]
 
 PERSISTENCE_PATTERNS = [
@@ -221,7 +209,6 @@ LABELS = [
     ("FILE_OPS", FILE_OPS_PATTERNS),
     ("NATIVE", NATIVE_PATTERNS),
     ("LOG", LOGGING_PATTERNS),
-    ("STRING", STRINGS_PATTERNS),
     ("PERSISTENCE", PERSISTENCE_PATTERNS),
 ]
 
