@@ -4,23 +4,7 @@ import sys
 import json
 
 
-"""
-    Key note: this script skips packages that I've encountered
-    in the wild to be legit. Nothing prevents a malware author
-    from naming their package kotlin.something and hiding
-    malicious code there too, but we have to make a decision and
-    I decided to make this sacrifice for the sake of a handy tool.
-    The effort/time proportion to gain isn't good enough for me
-    not to skip these packages. Too much noise would be grepped.
-
-    Script prerequisites: ripgrep installed
-"""
-# TODO: some obfuscation does repeating patterns e. g. d1111e1111c1111r1111y1111p1111t111(...), so we can try to sed the "1111" with ""
-# the difficulty is in determining that its in fact "1111" - maybe long substrings repeating 3+ times in a line?
-
-
 SOURCES_DIR = sys.argv[1] if len(sys.argv) > 1 else sys.exit("[*] ERROR: you must pass the path to jadx output of sources as the first arg.")
-
 
 SKIP_PACKAGES = [
     'kotlin/',
@@ -39,7 +23,6 @@ SKIP_PACKAGES = [
     'retrofit2/',
     'com/squareup/',
 ]
-
 
 CRYPTO_PATTERNS = [
     r"\.decrypt\(",

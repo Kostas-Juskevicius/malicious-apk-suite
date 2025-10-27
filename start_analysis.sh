@@ -27,7 +27,7 @@ echo -e "[*] ANALYZING MANIFEST...\n"
 ./python/manifest_analysis.py > results/manifest_analysis.txt
 
 echo -e "[*] GREPPING PATTERNS IN SOURCE...\n"
-./python/ripgrep.py "$PWD/jadx/sources" > results/ripgrep.txt
+./python/grep.py "$PWD/jadx/sources" > results/grep.txt
 
 echo -e "[*] SEARCHING FOR STRINGS IN RESOURCES...\n"
 ./python/strings.py "$PWD/jadx/resources" > results/strings.txt
