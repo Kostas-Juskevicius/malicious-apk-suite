@@ -50,7 +50,10 @@ for res_file in resource_files:
         
         for match in grep_result.stdout.strip().split('\n'):
             if match:
-                print(f"[*] FOUND STRING / PATTERN: '{match}' in {res_file}")
+                print(f"[*] FOUND STRING:")
+                print(f"\t[*] STRING: '{match}'")
+                print(f"\t[*] OF PATTERN: '{pattern}'")
+                print(f"\t[*] IN FILE: in {res_file}")
     print()
 
 print("[*] EXTRACTION COMPLETE")
