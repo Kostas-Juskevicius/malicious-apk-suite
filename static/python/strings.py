@@ -48,12 +48,14 @@ for res_file in resource_files:
         cmd = ['rg', '-P', pattern]
         grep_result = subprocess.run(cmd, input=result.stdout, capture_output=True, text=True)
         
-        for match in grep_result.stdout.strip().split('\n'):
-            if match:
-                print(f"[*] FOUND STRING:")
-                print(f"\t[*] STRING: '{match}'")
-                print(f"\t[*] OF PATTERN: '{pattern}'")
-                print(f"\t[*] IN FILE: in {res_file}")
+        matches = grep_result.stdout.strip().split('\n')
+        if matches:
+            print(f"[*] FOUND STRINGS IN {res_file}:")
+            for match in matches:
+                if match:
+                    print(f"[*] FOUND STRING:")
+                    print(f"\t[*] STRING: '{match}'")
+                    print(f"\t[*] OF PATTERN: '{pattern}'")
     print()
 
 print("[*] EXTRACTION COMPLETE")
