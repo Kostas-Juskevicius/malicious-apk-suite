@@ -122,17 +122,23 @@ NETWORK_PATTERNS = [
     r"Socket\(",
 ]
 
-# todo
 FILE_OPS_PATTERNS = [
-    r"System\.getProperty\(\"java.io.tmpdir\"\)",
-    r"\.delete\(",
-    r"\.deleteOnExit\(",
+    r"\"java.io.tmpdir\"",
+    r"new\s+FileWriter",
+    r"Files\.(?:exists|readAllLines|readAllBytes|write|delete|copy|move)",
     r"FileOutputStream",
-    r"\.write\(",
+    r"FileInputStream",
+    r"FileChannel",
+    r"new Scanner\(new File\(",
+    r"AsynchronousFileChannel",
+    r"File.(?:delete|deleteOnExit)",
+    r"File.(?:exists|canRead|canWrite|list|listFiles|newDirectoryStream)",
+]
+
+COMMAND_EXECUTION_PATTERNS = [
     r"Runtime\.getRuntime\(\)\.exec",
 ]
 
-# todo
 NATIVE_PATTERNS = [
     r"System\.loadLibrary\(\"(?!.*(?:firebase|gms)).*\"\)",  # exclude firebase/gms
     r"System\.load\(\"(?!.*(?:firebase|gms)).*\"\)",  # exclude firebase/gms
@@ -210,13 +216,13 @@ LABELS = [
     ("REFLECTION", REFLECTION_PATTERNS, []),
     ("DYNAMIC LOADING", DYNAMIC_LOADING_PATTERNS, []),
     ("NETWORK", NETWORK_PATTERNS, []),
+    ("COMMAND_EXECUTION_PATTERNS", COMMAND_EXECUTION_PATTERNS, []),
     ("FILE OPS", FILE_OPS_PATTERNS, []),
     ("NATIVE", NATIVE_PATTERNS, ["synthetic"]),
     ("LOG", LOGGING_PATTERNS, []),
     ("SERVICE PERSISTENCE", PERSISTENCT_SERVICE_PATTERNS, []),
 ]
-
-
+ 
 for label, patterns, exclude in LABELS:
     grep_and_print(label, patterns, exclude)
 print("\n[*] GREPPING COMPLETE\n")
