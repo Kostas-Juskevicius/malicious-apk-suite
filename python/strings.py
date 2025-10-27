@@ -53,6 +53,6 @@ for res_file in resource_files:
                     print(f"[*] FOUND STRING:")
                     print(f"\t[*] STRING: '{match}'")
                     print(f"\t[*] OF PATTERN: '{pattern}'")
-        print()
+            print()
 
 print("[*] EXTRACTION COMPLETE")

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from collections import defaultdict
+import os
 import subprocess
 import sys
 import json
@@ -416,9 +418,20 @@ def grep_and_print(label, patterns, exclude_patterns):
     cmd.append(SOURCES_DIR)
     
     result = subprocess.run(cmd, capture_output=True, text=True)
-
     lines = result.stdout.strip().split('\n')
-    pattern_header_printed = False
+    # pattern_header_printed = False
+    matches_by_file = defaultdict(list)
+
+def grep_and_print(label, patterns, exclude_patterns):
+    cmd = ["rg", "--json", "--type", "java", "-P"]
+    for p in patterns:
+        cmd.extend(["-e", p])
+    cmd.append(SOURCES_DIR)
+    
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    lines = result.stdout.strip().split('\n')
+    matches_by_file = defaultdict(list)
+    
     for line in filter(None, lines):
         data = json.loads(line)
         if data.get('type') != 'match':
@@ -427,6 +440,7 @@ def grep_and_print(label, patterns, exclude_patterns):
         m = data['data']
         filepath = m['path']['text']
         line_text = m['lines']['text'].strip() # misleading key. its a single line, not 'lines'
+        line_number = m['line_number']
 
         # skip grepping from packages e. g. legit packages                
         skip = False
@@ -444,14 +458,16 @@ def grep_and_print(label, patterns, exclude_patterns):
                 break
         if skip:
             continue
-
-        if not pattern_header_printed:
-            print(f"[*] GREPPING FOR {label}...")
-            pattern_header_printed = True
-            
-        print(f"[*] FOUND {label}: {line_text} in {filepath} at line {m['line_number']}")
+        
+        matches_by_file[filepath].append((line_number, line_text))
     
-    if pattern_header_printed:
+    if matches_by_file:
+        print(f"[*] GREPPING FOR {label}...")
+        for filepath, matches in matches_by_file.items():
+            print(f"[*] FOUND IN: {os.path.basename(filepath)}")
+            for line_number, line_text in matches:
+                print(f"\t[*] CODE: \" {line_text}\"")
+                print(f"\t[*] AT LINE: {line_text}")
         print()
 
 
