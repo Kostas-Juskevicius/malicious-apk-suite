@@ -39,4 +39,4 @@ echo -e "[*] SEARCHING FOR STRINGS IN RESOURCES...\n"
 # ./static/python/steganography.py "$PWD/jadx/resources" > steganography.txt
 
 echo -e "[*] LAUNCHING GUI...\n"
-./python/viewer_gui.py
+./python/ui.py
