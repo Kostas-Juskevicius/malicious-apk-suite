@@ -366,7 +366,7 @@ LOGGING_PATTERNS = [
     r"Log\.[a-z]\(",  # Log.d(, Log.e(, etc
 ]
 
-PERSISTENCE_SERVICE_PATTERNS = [
+PERSISTENT_SERVICE_PATTERNS = [
     r"\bSTART_STICKY\b",
     r"\bSTART_NOT_STICKY\b",
     r"\bSTART_REDELIVER_INTENT\b",
@@ -472,7 +472,7 @@ LABELS = [
     ("FILE OPS", FILE_OPS_PATTERNS, []),
     ("NATIVE", NATIVE_PATTERNS, ["synthetic"]),
     ("LOG", LOGGING_PATTERNS, []),
-    ("SERVICE PERSISTENCE", PERSISTENCT_SERVICE_PATTERNS, []),
+    ("SERVICE PERSISTENCE", PERSISTENT_SERVICE_PATTERNS, []),
 ]
  
 for label, patterns, exclude in LABELS:
