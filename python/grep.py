@@ -3,6 +3,7 @@ import subprocess
 import sys
 import json
 
+"""Greps malicious code patterns in jadx decompilation output"""
 
 SOURCES_DIR = sys.argv[1] if len(sys.argv) > 1 else sys.exit("[*] ERROR: you must pass the path to jadx output of sources as the first arg.")
 

@@ -3,10 +3,7 @@ import subprocess
 import sys
 import os
 
-
-# TODO: maybe should look at all files rather than at a whitelist of them?
-# TODO: maybe some of this should synergize with the steganography.py script, maybe that one finds hidden bins in non-bin files and passes them here?
-
+"""Finds interesting strings in APK resource files"""
 
 RES_DIR = sys.argv[1] if len(sys.argv) > 1 else sys.exit("[*] ERROR: you must pass the path to jadx output of resources as the first arg.")
 MIN_MEANINGFUL_STRING_LENGTH = 8
@@ -18,7 +15,7 @@ STRINGS_PATTERNS = [
     r"ws://",
     r"wss://",
     r"ftp://",
-    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",  # IP addresses
+    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", # IP addresses
     r"(?<!\.)[a-zA-Z0-9-]+\.(com|net|org|io|xyz|ru|cn|onion)(?!\.)",  # domains
     r"aHR0cDovL2",  # base64 http://
     r"aHR0cHM6Ly9",  # base64 https://

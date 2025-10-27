@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from lxml import etree
 
+"""Parses the manifest and reports only the most important info"""
+
 IGNORABLE_COMPONENTS = [
     "com.google.android.gms",
     "com.google.firebase",
