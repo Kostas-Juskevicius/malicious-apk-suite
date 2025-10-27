@@ -45,7 +45,7 @@ for res_file in resource_files:
         cmd = ['rg', '-P', pattern]
         grep_result = subprocess.run(cmd, input=result.stdout, capture_output=True, text=True)
         
-        matches = grep_result.stdout.strip().split('\n')
+        matches = filter(None, grep_result.stdout.strip().split('\n'))
         if matches:
             print(f"[*] FOUND STRINGS IN {res_file}:")
             for match in matches:
@@ -53,6 +53,6 @@ for res_file in resource_files:
                     print(f"[*] FOUND STRING:")
                     print(f"\t[*] STRING: '{match}'")
                     print(f"\t[*] OF PATTERN: '{pattern}'")
-    print()
+        print()
 
 print("[*] EXTRACTION COMPLETE")

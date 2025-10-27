@@ -124,6 +124,7 @@ NETWORK_PATTERNS = [
 
 # todo
 FILE_OPS_PATTERNS = [
+    r"System\.getProperty\(\"java.io.tmpdir\"\)",
     r"\.delete\(",
     r"\.deleteOnExit\(",
     r"FileOutputStream",
@@ -133,9 +134,9 @@ FILE_OPS_PATTERNS = [
 
 # todo
 NATIVE_PATTERNS = [
-    r"System\.loadLibrary\(['\"](?!.*(?:firebase|gms))[^'\"]+['\"]\)",  # exclude firebase/gms
-    r"public\s+(?:static\s+)?native\s+",
-    r"native\s+\w+\s+\w+\(",
+    r"System\.loadLibrary\(\"(?!.*(?:firebase|gms)).*\"\)",  # exclude firebase/gms
+    r"System\.load\(\"(?!.*(?:firebase|gms)).*\"\)",  # exclude firebase/gms
+    r"(?:static\s+)?native\s+\w+\s+\w",
 ]
 
 LOGGING_PATTERNS = [
@@ -192,7 +193,9 @@ def grep_and_print(label, patterns, exclude_patterns):
             pattern_header_printed = True
             
         print(f"[*] FOUND {label}: {line_text} in {filepath} at line {m['line_number']}")
-    print()
+    
+    if pattern_header_printed:
+        print()
 
 
 LABELS = [
