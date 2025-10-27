@@ -466,7 +466,7 @@ def grep_and_print(label, patterns, exclude_patterns):
         for filepath, matches in matches_by_file.items():
             print(f"[*] FOUND IN: {os.path.basename(filepath)}")
             for line_number, line_text in matches:
-                print(f"\t[*] CODE: \" {line_text}\"")
+                print(f"\t[*] CODE: {line_text}")
                 print(f"\t[*] AT LINE: {line_number}")
                 print(f"\t[*]")
         print()
