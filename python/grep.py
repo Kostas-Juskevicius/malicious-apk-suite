@@ -112,14 +112,52 @@ DYNAMIC_LOADING_PATTERNS = [
     r"loadDex",
 ]
 
-# todo
 NETWORK_PATTERNS = [
-    r"HttpURLConnection",
-    r"OkHttpClient",
-    r"\.openConnection\(",
-    r"HttpClient",
-    r"\.execute\(",
-    r"Socket\(",
+    # Standard Java HTTP
+    r"\bHttpURLConnection\b",
+    r"\bHttpsURLConnection\b",
+    r"\.openConnection\s*\(",
+    r"\.getInputStream\s*\(",
+    r"\.getOutputStream\s*\(",
+    
+    # Raw sockets
+    r"\bSocket\s*\(",
+    r"\bServerSocket\s*\(",
+    r"\bDatagramSocket\s*\(",
+    r"\bDatagramPacket\s*\(",
+    
+    # OkHttp (very common in malware)
+    r"\bOkHttpClient\b",
+    r"\.newCall\s*\(",
+    r"\bRequest\.Builder\b",
+    
+    # Apache HTTP (legacy but still used)
+    r"\bDefaultHttpClient\b",
+    r"\bHttpPost\b",
+    r"\bHttpGet\b",
+    r"\.execute\s*\(",
+    
+    # WebSockets
+    r"\bWebSocket\b",
+    r"wss?://",
+    
+    # URLs and IPs
+    r"https?://[^\s'\"<>]+",
+    r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b",
+    
+    # SSL/TLS manipulation (common in malware)
+    r"\bTrustManager\b",
+    r"\bX509TrustManager\b",
+    r"\bHostnameVerifier\b",
+    r"\.setSSLSocketFactory\s*\(",
+    
+    # Dynamic loading (often used to hide networking)
+    r"\bDexClassLoader\b",
+    r"\bClass\.forName\s*\(",
+    
+    # Native execution
+    r"Runtime\.getRuntime\s*\(\s*\)\.exec",
+    r"\bProcessBuilder\b",
 ]
 
 FILE_OPS_PATTERNS = [
