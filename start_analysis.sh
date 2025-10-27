@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ### This script expects you to be in the root directory of your analysis project.
-### The APK
+### The APK file should be in your current directory.
 
 # chmod scripts
-chmod +x ./python/*.py file should be in your current directory.
+chmod +x ./python/*.py
 
 # remove carriage returns \r so python shebangs dont freak out when written on windows
 find "$PWD" -name "*.py" -exec sed -i 's/\r$//' {} \;
