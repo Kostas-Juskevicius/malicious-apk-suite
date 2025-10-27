@@ -4,7 +4,7 @@
 ### The APK
 
 # chmod scripts
-chmod +x ./static/python/*.py file should be in your current directory.
+chmod +x ./python/*.py file should be in your current directory.
 
 # remove carriage returns \r so python shebangs dont freak out when written on windows
 find "$PWD" -name "*.py" -exec sed -i 's/\r$//' {} \;
@@ -24,13 +24,13 @@ fi
 mkdir -p "$PWD/results"
 
 echo -e "[*] ANALYZING MANIFEST...\n"
-./static/python/manifest_analysis.py > results/manifest_analysis.txt
+./python/manifest_analysis.py > results/manifest_analysis.txt
 
 echo -e "[*] GREPPING PATTERNS IN SOURCE...\n"
-./static/python/ripgrep.py "$PWD/jadx/sources" > results/ripgrep.txt
+./python/ripgrep.py "$PWD/jadx/sources" > results/ripgrep.txt
 
 echo -e "[*] SEARCHING FOR STRINGS IN RESOURCES...\n"
-./static/python/strings.py "$PWD/jadx/resources" > results/strings.txt
+./python/strings.py "$PWD/jadx/resources" > results/strings.txt
 
 # echo -e "[*] SEARCHING FOR PAYLOADS IN RESOURCES...\n"
 # ./static/python/steganography.py "$PWD/jadx/resources" > steganography.txt

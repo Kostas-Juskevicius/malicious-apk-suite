@@ -94,7 +94,7 @@ ACCESSIBILITY_PATTERNS = [
 
 OBFUSCATION_PATTERNS = [
     r"String\s+\w+\s*=\s*\"[^\"]*\"\s*\+\s*\"[^\"]*\"\s*\+", # string concatenation
-    r'"\s*\+\s*"',  # string concatenation
+    r'"\s*\+\s*"', # string concatenation
 ]
 
 WEBVIEW_PATTERNS = [
