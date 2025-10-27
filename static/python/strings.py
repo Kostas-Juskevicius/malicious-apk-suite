@@ -30,22 +30,22 @@ print("[*] EXTRACTING STRINGS FROM RESOURCES...\n")
 RESOURCE_EXTENSIONS = ['.dex', '.so', '.png', '.jpg', '.gif', '.ttf', '.otf', '.bin', '.dat']
 resource_files = []
 
+# Get resource files
 for root, dirs, files in os.walk(RES_DIR):
     for file in files:
         filepath = os.path.join(root, file)
         if any(filepath.endswith(ext) for ext in RESOURCE_EXTENSIONS):
             resource_files.append(filepath)
 
+# Run 'strings'
 for res_file in resource_files:
     result = subprocess.run(['strings', '-n', str(MIN_MEANINGFUL_STRING_LENGTH), res_file], capture_output=True, text=True)
     
     if result.returncode != 0:
         continue
     
-    all_strings = result.stdout.strip().split('\n')
-    
     for pattern in STRINGS_PATTERNS:
-        cmd = ['rg', '-o', pattern]
+        cmd = ['rg', '-P', pattern]
         grep_result = subprocess.run(cmd, input=result.stdout, capture_output=True, text=True)
         
         for match in grep_result.stdout.strip().split('\n'):
