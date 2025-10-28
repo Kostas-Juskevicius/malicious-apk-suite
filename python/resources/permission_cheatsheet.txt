@@ -1,5 +1,3 @@
-# Complete Android Permissions Reference - All Permissions
-
 ## LOCATION PERMISSIONS
 
 ACCESS_FINE_LOCATION

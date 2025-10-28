@@ -39,8 +39,8 @@ echo -e "[*] SEARCHING FOR STRINGS IN RESOURCES...\n"
 # echo -e "[*] SEARCHING FOR PAYLOADS IN RESOURCES...\n"
 # ./static/python/steganography.py "$PWD/jadx/resources" > steganography.txt
 
-# echo -e "[*] ANALYZING NATIVE LIBRARIES...\n"
-# ./static/python/steganography.py "$PWD/jadx/resources" > steganography.txt
+echo -e "[*] ANALYZING NATIVE LIBRARIES...\n"
+./static/python/native_libs.py "$PWD/jadx/resources" > native_libraries.txt
 
 echo -e "[*] LAUNCHING GUI...\n"
-./python/ui.py
+./python/ui.py &
