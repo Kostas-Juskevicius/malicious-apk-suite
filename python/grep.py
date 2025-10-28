@@ -248,7 +248,7 @@ DYNAMIC_LOADING_PATTERNS = [
     r"System\.loadLibrary\s*\(",
 ]
 
-HIGH_SIGNAL_NETWORK = [
+NETWORK_PATTERNS = [
     # Remote targets embedded as string literals (hardcoded URLs / IPs) — high signal
     r"\"https?://[^\"]+\"",                       # any hardcoded http(s) URL string
     r"\"(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?\"",      # hardcoded IPv4 (optionally with port)
