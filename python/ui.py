@@ -11,6 +11,7 @@ from PyQt6.QtGui import (
     QTextCharFormat, QPainter, QPaintEvent, QFontMetrics
 )
 from PyQt6.QtCore import Qt, QEvent, QObject, QRect, QSize
+from PyQt6.QtGui import QTextDocument
 
 # ---------- Horizontal scroll filter (unchanged) ----------
 class HorizontalScrollFilter(QObject):
