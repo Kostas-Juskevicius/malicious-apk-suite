@@ -24,7 +24,11 @@ fi
 mkdir -p "$PWD/results"
 
 echo -e "[*] ANALYZING MANIFEST...\n"
-./python/manifest_analysis.py > results/manifest_analysis.txt
+echo -e "[*] ANALYZING COMPONENTS...\n"
+./python/components.py > results/components.txt
+
+echo -e "[*] ANALYZING PERMISSIONS...\n"
+./python/permissions.py > results/permissions.txt
 
 echo -e "[*] GREPPING PATTERNS IN SOURCE...\n"
 ./python/grep.py "$PWD/jadx/sources" > results/grep.txt
