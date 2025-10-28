@@ -7,36 +7,43 @@ from pathlib import Path
 
 """Finds interesting strings in APK resource files using ripgrep directly on binaries for speed."""
 
-
 RESOURCE_STRINGS_PATTERNS = [
-    # --- C&C Communication ---
-    r"https?://[a-zA-Z0-9\.-]+\.(com|net|org|io|ru|tk|ml|ga|cf|top|xyz|onion)/[a-zA-Z0-9\./\-_%\?=&]*", # URL patterns
-    r"socks[45]://[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]{1,5}", # SOCKS proxy
-    r"ftp://[a-zA-Z0-9\.-]+:[a-zA-Z0-9\.-]+@[a-zA-Z0-9\.-]+\.(com|net|org|io|ru|tk|ml|ga|cf|top|xyz|onion)/", # FTP credentials
-    # --- Identifiers / Secrets ---
-    r"[a-zA-Z0-9]{20,}", # Long random-looking strings (API keys, device IDs)
-    r"[A-Z]{2,3}_[A-Z0-9_]{10,}", # API key patterns (e.g., AWS, Google)
-    r"-----BEGIN [A-Z ]+-----", # RSA/EC/DSA keys
-    r"[a-zA-Z0-9+/]{32,}={0,2}", # Base64 potentially containing keys/secrets
-    # --- Commands / Actions ---
-    r"(?:exec|shell|system|Runtime\.getRuntime\(\)\.exec|ProcessBuilder)\s*\(", # Execution commands (if somehow in resources)
-    r"am broadcast -a", # Android broadcast commands
-    r"am start -a", # Android activity start commands
-    r"pm install", # Package manager install commands
-    r"su ", # Root command
-    r"chmod\s+\d{3,4}", # Permission change command
-    # --- Crypto / Persistence ---
-    r"(?:AES|RSA|DES|ChaCha20|Salsa20|Curve25519|Ed25519|SHA(?:256|512)|MD5)\s*(?:\+|/|-)\s*(?:CBC|ECB|GCM|CTR|OFB)", # Crypto algorithm names/modes
-    r"keystore://", # Android keystore references
-    r"/data/data/[a-zA-Z0-9_\.]+/", # App data directories (potential persistence)
-    r"/system/bin/", # System directories (potential persistence/modification)
-    # --- Other Suspicious ---
-    r"(?:imei|imsi|serial|mac|android_id)", # Device identifiers
-    r"(?:access_token|refresh_token|oauth_token)", # Token names
-    r"(\.onion|\.i2p)", # Dark web domains
-    r"(?:hook|hooked|hooking|frida|substrate|xposed)", # Hooking framework names (if hidden)
+    # --- C&C Communication (more specific) ---
+    # URLs containing specific paths often used by malware (e.g., /api/login, /upload, /cmd)
+    r"https?://[a-zA-Z0-9\.-]+\.(com|net|org|io|ru|tk|ml|ga|cf|top|xyz|onion)/(api|upload|cmd|login|control|bot)/[a-zA-Z0-9\./\-_%\?=&]*",
+    # SOCKS proxy (relatively specific)
+    r"socks[45]://[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]{1,5}",
+    # --- Identifiers / Secrets (more specific) ---
+    # Long base64 strings *likely* containing keys or significant data (length > 50, avoids short base64 fragments)
+    r"[a-zA-Z0-9+/]{50,}={0,2}",
+    # RSA/EC/DSA private keys (specific start/end markers)
+    r"-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----",
+    # --- Commands / Actions (specific to Android control) ---
+    # Direct system execution from resources (less common in legitimate resources)
+    r"Runtime\.getRuntime\(\)\.exec\(",
+    r"ProcessBuilder\(",
+    # Specific Android commands for persistence/modification
+    r"pm install -r ", # Install with replace flag
+    r"pm install -t ", # Install with test flag
+    r"am start -n [a-zA-Z0-9_\.]+/\.?[^/\s]+ --ei", # am start with extra intent data
+    r"am broadcast -n [a-zA-Z0-9_\.]+/\.?[^/\s]+ --es", # am broadcast with extra string data
+    # --- Crypto / Persistence (more specific) ---
+    # Specific crypto mode combinations often used for encryption
+    r"(?:AES|RSA|ChaCha20|Salsa20|Curve25519|Ed25519)\s*(?:\+|/|-)\s*(?:GCM|CTR)",
+    # Accessing specific sensitive system directories from resources
+    r"/data/data/[a-zA-Z0-9_\.]+/(shared_prefs|databases|cache)/", # Specific sensitive subdirs
+    # --- Other Highly Suspicious ---
+    # Common malware command strings (often found in config/resource files)
+    r"(?:exec_cmd|run_shell|execute_now|send_data_to_server)",
+    # Potential hardcoded credentials in URLs (less common in resource XML, more in code, but possible)
+    # r"https?://[a-zA-Z0-9\.-]+:[a-zA-Z0-9\.-]+@[a-zA-Z0-9\.-]+\.(com|net|org|io|ru|tk|ml|ga|cf|top|xyz|onion)/", # Still quite generic
+    # Specific malware-related filenames or paths
+    r"/dev/(?:shm|pts/[0-9]+)", # Shared memory, pseudo-terminals
+    r"(?:/system/bin/|/system/xbin/)(?:su|busybox|lib\S*\.so)", # Specific tools/binaries
 ]
 
+# Extensions to scan - focusing on likely places for hidden data
+# Adding .xml back, but patterns should be specific enough to avoid normal XML strings
 RESOURCE_EXTENSIONS = ['.dex', '.so', '.png', '.jpg', '.gif', '.ttf', '.otf', '.bin', '.dat', '.xml', '.txt', '.properties', '.json', '.db', '.sqlite']
 
 def should_scan_file(file_path: Path) -> bool:
@@ -101,11 +108,11 @@ def main():
     # Print results
     found_count = 0
     for res_file, file_results in results:
-        if file_results:
+        if file_results: # If any patterns matched in this file
             print(f"[*] FOUND STRINGS IN {res_file}:")
             for pattern, matches in file_results:
                 for match in matches:
-                    if match:
+                    if match: # Filter out empty strings if any
                         print(f"\t[*] FOUND STRING:")
                         print(f"\t\t[*] STRING: '{match}'")
                         print(f"\t\t[*] OF PATTERN: '{pattern}'")
@@ -113,7 +120,9 @@ def main():
             found_count += 1
 
     if found_count == 0:
-        print(f"TOTAL: {found_count} suspicious string matches found across {len(resource_files)} scanned files.")
+        print(f"[*] TOTAL: {found_count} suspicious string matches found across {len(resource_files)} scanned files.")
+    else:
+        print(f"[*] TOTAL: {found_count} files with suspicious string matches found out of {len(resource_files)} scanned.")
 
 if __name__ == "__main__":
     main()
