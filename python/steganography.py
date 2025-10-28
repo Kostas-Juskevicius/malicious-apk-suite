@@ -5,6 +5,7 @@ import os
 import math
 import argparse
 from pathlib import Path
+import sys
 
 # Constants
 BPP_THRESHOLD = 5.0  # bytes per pixel considered too high
