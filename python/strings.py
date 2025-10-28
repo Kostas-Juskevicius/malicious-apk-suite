@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""resource_strings.py
+"""
 Finds realistic malware-related strings in *suspicious* APK resource files using ripgrep directly on binaries.
 Reads the list of suspicious files from 'suspicious_resources_for_strings.txt'.
 Focuses on patterns likely hidden in resources.
@@ -19,7 +19,7 @@ RESOURCE_STRINGS_PATTERNS = [
     r"socks[45]://[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]{1,5}",
     # --- Identifiers / Secrets (more specific) ---
     # Long base64 strings *likely* containing keys or significant data (length > 50, avoids short base64 fragments)
-    r"[a-zA-Z0-9+/]{50,}={0,2}",
+    r"[a-zA-Z0-9+/]{50,}={1,2}",
     # RSA/EC/DSA private keys (specific start/end markers)
     r"-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----",
     # --- Commands / Actions (specific to Android control) ---
