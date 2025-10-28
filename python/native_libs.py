@@ -84,6 +84,8 @@ def analyze_lib(path: Path):
 
     if has_jni_onload:
         print("[*] FOUND JNI_OnLoad\n")
+    else:
+        print("[*] COULDN'T FIND JNI_OnLoad\n")
 
     print("[*] JNI FUNCTIONS (Java_*)")
     if not jni_syms:

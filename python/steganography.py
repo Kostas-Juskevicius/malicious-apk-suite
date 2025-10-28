@@ -4,10 +4,11 @@
 Checks:
 - bytes-per-pixel (too many bytes for given pixel dimensions)
 - magic bytes vs extension mismatch
-- Shannon entropy (sampled for large files)
 - embedded signatures in head/tail (zip/apk/dex/elf/pe)
+- (Entropy: Only warn if extremely high, e.g., >= 7.99, or if combined with another flag like high BPP)
 
 Outputs a short faithful report per-file (no Android permission categorization).
+Also writes a list of HIGH-CONFIDENCE suspicious files to 'suspicious_resources_for_strings.txt'.
 """
 from __future__ import annotations
 import os
@@ -17,8 +18,9 @@ import sys
 
 # Constants (edit here if needed)
 BPP_THRESHOLD = 5.0  # bytes per pixel considered too high
-ENTROPY_SUSPICIOUS = 7.5
-ENTROPY_UNMISTAKABLE = 7.9
+# Entropy thresholds - making them much stricter for initial "suspicious" list
+ENTROPY_COMBINED_THRESHOLD = 7.8  # Used if combined with another flag (e.g., high BPP)
+ENTROPY_ALWAYS_SUSPICIOUS = 7.99  # Used if entropy is this high regardless
 HEADER_READ = 4096  # bytes to read for header/magic
 TAIL_SCAN = 1024 * 1024  # bytes to scan from end for embedded signatures
 SAMPLE_CHUNK = 131072  # chunk size for entropy sampling in large files
@@ -106,12 +108,9 @@ def scan_for_embedded(path: str, primary_magic: str | None) -> list[tuple[str, i
             # Check if signature is at the very beginning
             if head.startswith(sig) and len(sig) > 2:
                 # Only add if it's NOT the primary magic detected for the file at offset 0
-                if not (name == primary_magic and f.tell() == len(sig)): # f.tell() is misleading here, just check offset 0 logic
-                # Simpler: if the name found at offset 0 matches the primary_magic passed in, don't add it.
-                    if not (name == primary_magic and 0 == 0): # This condition is always true if name matches primary_magic
-                        if name != primary_magic: # This is the correct check
-                            embedded.append((name, 0))
-                        # else: it's the primary signature, skip it
+                if name != primary_magic: # This is the correct check
+                    embedded.append((name, 0))
+                # else: it's the primary signature, skip it
         # Scan tail for signatures
         if size > HEADER_READ:
             f.seek(max(0, size - TAIL_SCAN))
@@ -139,18 +138,22 @@ def analyze_file(path: str) -> dict:
         "bpp": None,
         "embedded": [],
         "reasons": [],
-        "score": 0,
+        "score": 0, # Score is now less important, we'll use specific flags
+        "high_confidence_suspicious": False, # Flag for writing to file list
     }
 
     if entry["filesize"] == 0:
         entry["reasons"].append("empty file")
+        # Empty files might be suspicious, but let's not include them as "high confidence" for strings scan.
+        # They could be placeholders.
         return entry
 
     header = read_initial(path)
     entry["magic"] = detect_magic(header) or "UNKNOWN"
     size = entry["filesize"]
 
-    # --- Entropy Check ---
+    # --- Entropy Check (Calculating regardless, but flagging differently) ---
+    entropy_calc_failed = False
     try:
         if size <= 5 * 1024 * 1024:  # For smaller files, read all
             with open(path, "rb") as f:
@@ -165,14 +168,15 @@ def analyze_file(path: str) -> dict:
                 tail = f.read(SAMPLE_CHUNK)
             ent = shannon_entropy_bytes(head + mid + tail)
         entry["entropy"] = ent
-        if ent >= ENTROPY_UNMISTAKABLE:
-            entry["reasons"].append(f"high entropy {ent:.3f} >= {ENTROPY_UNMISTAKABLE} (strong indicator of packed/encrypted data)")
-            entry["score"] += 3
-        elif ent >= ENTROPY_SUSPICIOUS:
-            entry["reasons"].append(f"elevated entropy {ent:.3f} >= {ENTROPY_SUSPICIOUS}")
-            entry["score"] += 1
+        # Store for potential later use, but don't immediately flag based on this alone
+        # unless it's extremely high or combined with another flag.
+        if ent >= ENTROPY_ALWAYS_SUSPICIOUS:
+             entry["reasons"].append(f"high entropy {ent:.3f} >= {ENTROPY_ALWAYS_SUSPICIOUS} (very strong indicator of packed/encrypted data)")
+             entry["high_confidence_suspicious"] = True # Flag as high confidence due to extreme entropy
+             entry["score"] += 3
     except Exception:
         entry["reasons"].append("entropy: error computing")
+        entropy_calc_failed = True
 
     # --- Image-specific Checks (BPP) ---
     w, h = try_image_dimensions(path)
@@ -183,6 +187,13 @@ def analyze_file(path: str) -> dict:
         if bpp and bpp > BPP_THRESHOLD:
             entry["reasons"].append(f"bytes_per_pixel {bpp:.2f} > {BPP_THRESHOLD} (way too big for pixel dimensions)")
             entry["score"] += 2
+            # Check if BPP is high AND entropy is also high (suggesting data hidden in pixels or appended)
+            if entry["entropy"] is not None and entry["entropy"] >= ENTROPY_COMBINED_THRESHOLD:
+                entry["reasons"].append(f"elevated entropy {entry['entropy']:.3f} >= {ENTROPY_COMBINED_THRESHOLD} (combined with high BPP)")
+                entry["high_confidence_suspicious"] = True # Flag as high confidence due to combination
+            elif not entropy_calc_failed: # If entropy calc worked and BPP is high, flag it anyway
+                 entry["high_confidence_suspicious"] = True # High BPP alone is a good stego indicator
+
 
     # --- Embedded Signatures Check (PASS the primary magic to filter it) ---
     embedded = scan_for_embedded(path, entry["magic"])
@@ -192,8 +203,11 @@ def analyze_file(path: str) -> dict:
             entry["reasons"].append(f"found {name} at offset 0x{offset:x}")
             if name in ("DEX", "ELF", "PE/MZ"):
                 entry["score"] += 5  # High score for embedded executables
+                entry["high_confidence_suspicious"] = True # Embedded executables are HIGH CONFIDENCE
             else:
                 entry["score"] += 3  # Lower score for embedded archives
+                entry["high_confidence_suspicious"] = True # Embedded archives are also HIGH CONFIDENCE
+
 
     # --- Magic vs Extension Check ---
     ext_map = {
@@ -215,6 +229,7 @@ def analyze_file(path: str) -> dict:
     if expected and entry["magic"] != expected:
         entry["reasons"].append(f"magic '{entry['magic']}' does not match extension '{entry['extension']}'")
         entry["score"] += 2
+        entry["high_confidence_suspicious"] = True # Magic mismatch is HIGH CONFIDENCE
 
     return entry
 
@@ -265,18 +280,30 @@ def main():
                 res = analyze_file(str(file_path))
                 results.append(res)
 
-    # Print only files with warnings (score > 0 or reasons)
+    # --- Write HIGH CONFIDENCE suspicious files to a file for strings.py ---
+    high_confidence_paths = [res['path'] for res in results if res.get('high_confidence_suspicious', False)]
+    with open('suspicious_resources_for_strings.txt', 'w') as f_out:
+        for path in high_confidence_paths:
+            f_out.write(path + '\n')
+
+    # Print ALL files with ANY warnings (score > 0 or reasons), but clearly mark high confidence ones
     found_count = 0
     for res in results:
         if res["score"] > 0 or len(res["reasons"]) > 0:
             print(f"[*] FOUND: {res['path']} ({res['magic']})")
             for reason in res["reasons"]:
-                print(f"    [*] WARNING: {reason}")
+                 prefix = "    [*] WARNING: "
+                 if res.get('high_confidence_suspicious', False):
+                     # Optionally mark high confidence ones differently in the main output too
+                     # prefix = "    [*] HIGH CONFIDENCE WARNING: " # Or just keep it simple
+                     pass # Keep the prefix as is for now
+                 print(prefix + reason)
             print() # Add a blank line after each file's warnings
             found_count += 1
 
     # Print summary line if any files were found
-    print(f"[*] TOTAL: {found_count} suspicious files found out of {total_files} scanned.")
+    print(f"[*] TOTAL: {found_count} files with warnings found out of {total_files} scanned.")
+    print(f"[*] Wrote {len(high_confidence_paths)} HIGH CONFIDENCE suspicious file paths to 'suspicious_resources_for_strings.txt'")
 
 if __name__ == "__main__":
     main()
