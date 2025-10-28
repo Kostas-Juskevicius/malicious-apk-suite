@@ -33,11 +33,15 @@ echo -e "[*] ANALYZING PERMISSIONS...\n"
 echo -e "[*] GREPPING PATTERNS IN SOURCE...\n"
 ./python/grep.py "$PWD/jadx/sources" > results/grep.txt
 
-echo -e "[*] SEARCHING FOR STRINGS IN RESOURCES...\n"
-./python/strings.py "$PWD/jadx/resources" > results/strings.txt
-
-echo -e "[*] SEARCHING FOR PAYLOADS IN RESOURCES...\n"
+echo -e "[*] SEARCHING FOR SUSPICIOUS RESOURCES...\n"
 ./python/steganography.py "$PWD/jadx/resources" > results/steganography.txt
+
+echo -e "[*] SEARCHING FOR STRINGS IN SUSPICIOUS RESOURCES...\n"
+if [ -f "suspicious_resources_for_strings.txt" ]; then
+    ./python/resource_strings.py > results/strings.txt
+else
+    echo "[*] No suspicious resource list found. Skipping focused strings analysis." > results/strings.txt
+fi
 
 echo -e "[*] ANALYZING NATIVE LIBRARIES...\n"
 ./python/native_libs.py "$PWD/jadx/resources" > results/native_libraries.txt
