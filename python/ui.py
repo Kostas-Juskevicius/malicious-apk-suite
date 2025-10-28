@@ -7,12 +7,12 @@ from PyQt6.QtWidgets import (
     QLineEdit, QLabel, QMessageBox
 )
 from PyQt6.QtGui import QFont, QColor, QPalette, QTextCursor, QShortcut, QKeySequence, QTextDocument, QTextCharFormat
-from PyQt6.QtCore import Qt, QEvent
+from PyQt6.QtCore import Qt, QEvent, QObject
 
-class HorizontalScrollFilter(QEvent):
+class HorizontalScrollFilter(QObject):
     """Event filter for shift+scroll horizontal scrolling"""
     def __init__(self, parent):
-        super().__init__()
+        super().__init__(parent)
         self.parent = parent
         
     def eventFilter(self, obj, event):
