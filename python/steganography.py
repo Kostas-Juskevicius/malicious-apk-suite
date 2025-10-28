@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+"""Minimal resource tamper/steganography checker."""
+
 from __future__ import annotations
 import os
 import sys
-
-"""Minimal resource tamper/steganography checker."""
-
+import math
 
 TAIL_SCAN = 1024 * 1024
 HEADER_READ = 4096
@@ -114,7 +114,6 @@ def analyze_file(path: str) -> dict:
         "bpp": None,
         "embedded": [],
         "reasons": [],
-        "class": "normal",
     }
 
     if entry["filesize"] == 0:
@@ -131,63 +130,34 @@ def analyze_file(path: str) -> dict:
 
     embedded = scan_for_embedded(path)
     entry["embedded"] = embedded
-    if embedded:
-        for name, offset in embedded:
-            entry["reasons"].append(f"found {name} at offset 0x{offset:x}")
+    for name, offset in embedded:
+        entry["reasons"].append(f"found {name} at offset 0x{offset:x}")
 
     if any(e[0] == "ZIP" for e in embedded):
         tail = read_tail(path, TAIL_SCAN)
         if b"META-INF/" in tail or b"MANIFEST.MF" in tail or b".RSA" in tail or b".SF" in tail:
             entry["reasons"].append("embedded ZIP/JAR with META-INF / signature files")
-            entry["class"] = "signature"
-            return entry
-
-    if any(e[0] in ("DEX", "ELF", "PE/MZ") for e in embedded):
-        entry["reasons"].append("embedded executable (DEX/ELF/PE)")
-        entry["class"] = "dangerous"
-        return entry
 
     ext_map = {".png": "PNG", ".jpg": "JPEG", ".jpeg": "JPEG", ".gif": "GIF", ".webp": "RIFF/WEBP"}
     expected = ext_map.get(entry["extension"]) if entry["extension"] else None
     if expected and entry["magic"] != expected:
         entry["reasons"].append(f"extension {entry['extension']} but magic {entry['magic']}")
-        entry["class"] = "dangerous"
-        return entry
 
     if entry["bpp"] is not None and entry["bpp"] > 5.0:
         entry["reasons"].append(f"bytes_per_pixel {entry['bpp']:.2f} > 5.0 (way too big for pixel dimensions)")
-        entry["class"] = "dangerous"
-        return entry
+
+    if any(e[0] in ("DEX", "ELF", "PE/MZ") for e in embedded):
+        entry["reasons"].append("embedded executable (DEX/ELF/PE)")
 
     return entry
 
 
 def print_report(results: list[dict]):
-    dangerous = [r for r in results if r["class"] == "dangerous"]
-    signature = [r for r in results if r["class"] == "signature"]
-    normal = [r for r in results if r["class"] == "normal"]
-
-    print(f"TOTAL: {len(dangerous)} dangerous, {len(signature)} signature, {len(normal)} normal")
-    print()
-
-    print("[*] NORMAL (including suspicious)")
-    for r in normal:
-        print(f"\t[*] {r['path']} ({r['magic']}) — {pretty_bytes(r['filesize'])}")
-    print()
-
-    print("[*] SIGNATURE FILES (require signature match - so usually needs to be system app)")
-    for r in signature:
-        print(f"\t[*] {r['path']} ({r['magic']}) — {pretty_bytes(r['filesize'])}")
+    for r in results:
+        print(f"[*] FOUND: {r['path']} ({r['magic']})")
         if r["reasons"]:
-            print(f"\t\t-> reason: {'; '.join(r['reasons'])}")
-    print()
-
-    print("[*] DANGEROUS FILES")
-    for r in dangerous:
-        extra = f" w{r['w']}x{r['h']} bpp={r['bpp']:.2f}" if r['w'] and r['h'] and r['bpp'] else ""
-        print(f"\t[*] {r['path']} ({r['magic']}) — {pretty_bytes(r['filesize'])}{extra}")
-        if r["reasons"]:
-            print(f"\t\t-> reason: {'; '.join(r['reasons'])}")
+            for reason in r["reasons"]:
+                print(f"    -> reason: {reason}")
     print()
 
 
