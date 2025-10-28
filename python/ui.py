@@ -4,10 +4,10 @@ from pathlib import Path
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTabWidget, QTextEdit, 
     QVBoxLayout, QHBoxLayout, QWidget, QPushButton,
-    QLineEdit, QLabel, QMessageBox
+    QLineEdit, QLabel, QMessageBox, QPlainTextEdit
 )
-from PyQt6.QtGui import QFont, QColor, QPalette, QTextCursor, QShortcut, QKeySequence, QTextDocument, QTextCharFormat
-from PyQt6.QtCore import Qt, QEvent, QObject
+from PyQt6.QtGui import QFont, QColor, QPalette, QTextCursor, QShortcut, QKeySequence, QTextDocument, QTextCharFormat, QPainter, QTextFormat
+from PyQt6.QtCore import Qt, QEvent, QObject, QRect, QSize
 
 class HorizontalScrollFilter(QObject):
     """Event filter for shift+scroll horizontal scrolling"""
@@ -27,6 +27,75 @@ class HorizontalScrollFilter(QObject):
                 h_scroll.setValue(h_scroll.value() - delta)
                 return True
         return False
+
+
+class LineNumberArea(QWidget):
+    """Line number area widget"""
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        
+    def sizeHint(self):
+        return QSize(self.editor.line_number_area_width(), 0)
+    
+    def paintEvent(self, event):
+        self.editor.line_number_area_paint_event(event)
+
+
+class NumberedTextEdit(QPlainTextEdit):
+    """Plain text edit with line numbers"""
+    def __init__(self):
+        super().__init__()
+        self.line_number_area = LineNumberArea(self)
+        
+        self.blockCountChanged.connect(self.update_line_number_area_width)
+        self.updateRequest.connect(self.update_line_number_area)
+        
+        self.update_line_number_area_width(0)
+        
+    def line_number_area_width(self):
+        digits = len(str(max(1, self.blockCount())))
+        space = 10 + self.fontMetrics().horizontalAdvance('9') * digits
+        return space
+    
+    def update_line_number_area_width(self, _):
+        self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
+    
+    def update_line_number_area(self, rect, dy):
+        if dy:
+            self.line_number_area.scroll(0, dy)
+        else:
+            self.line_number_area.update(0, rect.y(), self.line_number_area.width(), rect.height())
+        
+        if rect.contains(self.viewport().rect()):
+            self.update_line_number_area_width(0)
+    
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        cr = self.contentsRect()
+        self.line_number_area.setGeometry(QRect(cr.left(), cr.top(), self.line_number_area_width(), cr.height()))
+    
+    def line_number_area_paint_event(self, event):
+        painter = QPainter(self.line_number_area)
+        painter.fillRect(event.rect(), QColor(40, 40, 40))
+        
+        block = self.firstVisibleBlock()
+        block_number = block.blockNumber()
+        top = int(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
+        bottom = top + int(self.blockBoundingRect(block).height())
+        
+        while block.isValid() and top <= event.rect().bottom():
+            if block.isVisible() and bottom >= event.rect().top():
+                number = str(block_number + 1)
+                painter.setPen(QColor(100, 100, 100))
+                painter.drawText(0, top, self.line_number_area.width() - 5, 
+                               self.fontMetrics().height(), Qt.AlignmentFlag.AlignRight, number)
+            
+            block = block.next()
+            top = bottom
+            bottom = top + int(self.blockBoundingRect(block).height())
+            block_number += 1
+
 
 class ResultViewer(QMainWindow):
     def __init__(self, results_dir="results"):
@@ -57,10 +126,11 @@ class ResultViewer(QMainWindow):
         # Top bar with controls
         top_bar = QHBoxLayout()
         
-        # Search box
+        # Search section (compact)
         search_label = QLabel("Search:")
         self.search_box = QLineEdit()
-        self.search_box.setPlaceholderText("Search in current tab...")
+        self.search_box.setPlaceholderText("Find...")
+        self.search_box.setMaximumWidth(200)
         self.search_box.returnPressed.connect(self.find_next)
         self.search_box.textChanged.connect(self.on_search_changed)
         
@@ -68,21 +138,39 @@ class ResultViewer(QMainWindow):
         search_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
         search_shortcut.activated.connect(self.focus_search)
         
-        # Navigation buttons
-        self.prev_btn = QPushButton("◄ Previous")
+        # Navigation buttons (compact, next to search)
+        self.prev_btn = QPushButton("◄")
+        self.prev_btn.setMaximumWidth(40)
         self.prev_btn.clicked.connect(self.find_previous)
+        self.prev_btn.setToolTip("Previous match")
         
-        self.next_btn = QPushButton("Next ►")
+        self.next_btn = QPushButton("►")
+        self.next_btn.setMaximumWidth(40)
         self.next_btn.clicked.connect(self.find_next)
+        self.next_btn.setToolTip("Next match")
+        
+        # Spacer
+        top_bar.addWidget(search_label)
+        top_bar.addWidget(self.search_box)
+        top_bar.addWidget(self.prev_btn)
+        top_bar.addWidget(self.next_btn)
+        top_bar.addStretch()
+        
+        # Navigation buttons
+        top_btn = QPushButton("⇱ Top")
+        top_btn.clicked.connect(self.go_to_top)
+        top_btn.setToolTip("Go to top of file")
+        
+        bottom_btn = QPushButton("⇲ Bottom")
+        bottom_btn.clicked.connect(self.go_to_bottom)
+        bottom_btn.setToolTip("Go to bottom of file")
         
         # Copy button
         copy_btn = QPushButton("Copy Tab")
         copy_btn.clicked.connect(self.copy_current_tab)
         
-        top_bar.addWidget(search_label)
-        top_bar.addWidget(self.search_box, stretch=1)
-        top_bar.addWidget(self.prev_btn)
-        top_bar.addWidget(self.next_btn)
+        top_bar.addWidget(top_btn)
+        top_bar.addWidget(bottom_btn)
         top_bar.addWidget(copy_btn)
         
         layout.addLayout(top_bar)
@@ -94,6 +182,24 @@ class ResultViewer(QMainWindow):
         
         # Status bar
         self.statusBar().showMessage("Ready")
+        
+    def go_to_top(self):
+        """Jump to top of current tab"""
+        current_widget = self.tabs.currentWidget()
+        if current_widget and isinstance(current_widget, (QTextEdit, QPlainTextEdit)):
+            cursor = current_widget.textCursor()
+            cursor.movePosition(QTextCursor.MoveOperation.Start)
+            current_widget.setTextCursor(cursor)
+            current_widget.ensureCursorVisible()
+    
+    def go_to_bottom(self):
+        """Jump to bottom of current tab"""
+        current_widget = self.tabs.currentWidget()
+        if current_widget and isinstance(current_widget, (QTextEdit, QPlainTextEdit)):
+            cursor = current_widget.textCursor()
+            cursor.movePosition(QTextCursor.MoveOperation.End)
+            current_widget.setTextCursor(cursor)
+            current_widget.ensureCursorVisible()
         
     def focus_search(self):
         """Focus search box and select all text"""
@@ -157,7 +263,7 @@ class ResultViewer(QMainWindow):
             QLineEdit:focus {
                 border: 1px solid #007acc;
             }
-            QTextEdit {
+            QTextEdit, QPlainTextEdit {
                 background: #1e1e1e;
                 color: #d4d4d4;
                 border: 1px solid #3e3e42;
@@ -175,12 +281,12 @@ class ResultViewer(QMainWindow):
             with open(self.cheatsheet_file, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
             
-            # Create text widget for cheatsheet
-            text_edit = QTextEdit()
+            # Create text widget with line numbers
+            text_edit = NumberedTextEdit()
             text_edit.setReadOnly(True)
             text_edit.setPlainText(content)
             text_edit.setFont(QFont("Courier New", 14))
-            text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+            text_edit.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
             
             # Add horizontal scroll filter
             scroll_filter = HorizontalScrollFilter(text_edit)
@@ -231,12 +337,12 @@ class ResultViewer(QMainWindow):
                 self.results[name] = content
                 self.original_contents[name] = content
                 
-                # Create tab with text widget
-                text_edit = QTextEdit()
+                # Create tab with text widget and line numbers
+                text_edit = NumberedTextEdit()
                 text_edit.setReadOnly(True)
                 text_edit.setPlainText(content)
                 text_edit.setFont(QFont("Courier New", 14))
-                text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+                text_edit.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
                 
                 # Add horizontal scroll filter
                 scroll_filter = HorizontalScrollFilter(text_edit)
@@ -257,15 +363,16 @@ class ResultViewer(QMainWindow):
     def copy_current_tab(self):
         """Copy current tab content to clipboard"""
         current_widget = self.tabs.currentWidget()
-        if current_widget and isinstance(current_widget, QTextEdit):
+        if current_widget and isinstance(current_widget, (QTextEdit, QPlainTextEdit)):
             text = current_widget.toPlainText()
             QApplication.clipboard().setText(text)
             self.statusBar().showMessage("✓ Copied to clipboard!", 3000)
     
     def highlight_all_matches(self, text_edit, search_text):
         """Highlight all occurrences of search text"""
-        if not search_text:
-            text_edit.setExtraSelections([])
+        if not search_text or not isinstance(text_edit, QPlainTextEdit):
+            if hasattr(text_edit, 'setExtraSelections'):
+                text_edit.setExtraSelections([])
             return
         
         extra_selections = []
@@ -283,7 +390,7 @@ class ResultViewer(QMainWindow):
             if cursor.isNull():
                 break
             
-            selection = QTextEdit.ExtraSelection()
+            selection = QPlainTextEdit.ExtraSelection()
             selection.cursor = cursor
             selection.format = highlight_format
             extra_selections.append(selection)
@@ -293,7 +400,7 @@ class ResultViewer(QMainWindow):
     def on_search_changed(self, text):
         """Called when search text changes"""
         current_widget = self.tabs.currentWidget()
-        if current_widget and isinstance(current_widget, QTextEdit):
+        if current_widget and isinstance(current_widget, (QTextEdit, QPlainTextEdit)):
             self.highlight_all_matches(current_widget, text)
         
     def find_next(self):
@@ -303,7 +410,7 @@ class ResultViewer(QMainWindow):
             return
             
         current_widget = self.tabs.currentWidget()
-        if not current_widget or not isinstance(current_widget, QTextEdit):
+        if not current_widget or not isinstance(current_widget, (QTextEdit, QPlainTextEdit)):
             return
         
         # Search from current cursor position
@@ -330,7 +437,7 @@ class ResultViewer(QMainWindow):
             return
             
         current_widget = self.tabs.currentWidget()
-        if not current_widget or not isinstance(current_widget, QTextEdit):
+        if not current_widget or not isinstance(current_widget, (QTextEdit, QPlainTextEdit)):
             return
         
         # Search backwards
@@ -355,7 +462,7 @@ class ResultViewer(QMainWindow):
         search_text = self.search_box.text()
         if search_text:
             current_widget = self.tabs.currentWidget()
-            if current_widget and isinstance(current_widget, QTextEdit):
+            if current_widget and isinstance(current_widget, (QTextEdit, QPlainTextEdit)):
                 self.highlight_all_matches(current_widget, search_text)
 
 
