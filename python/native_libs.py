@@ -70,7 +70,7 @@ def pick_target_so(resources_dir: Path):
 
 
 def analyze_lib(path: Path):
-    print(f"[*] ANALYZING NATIVE LIBRARY: {path.name}\n")
+    print(f"[*] ANALYZING NATIVE LIBRARY: {path}\n")
 
     arch = get_architecture(str(path))
     syms = get_exported_symbols(str(path))
@@ -78,13 +78,12 @@ def analyze_lib(path: Path):
     jni_syms = [s for s in syms if s.startswith("Java_")]
     has_jni_onload = any(s == "JNI_OnLoad" for s in syms)
 
-    print(f"TOTAL: {len(syms)} exported, {len(jni_syms)} JNI, {len(libs)} linked\n")
+    print(f"[*] TOTAL EXPORTED SYMBOLS: {len(syms)}\n")
 
-    print("[*] LIBRARY INFORMATION")
-    print(f"\t[*] Path: {path}")
-    print(f"\t[*] Architecture: {arch}")
-    print(f"\t[*] JNI_OnLoad: {'present' if has_jni_onload else 'missing'}")
-    print(f"\t[*] Linked libs: {', '.join(libs) if libs else '(none)'}\n")
+    print(f"[*] Architecture: {arch}\n")
+
+    if has_jni_onload:
+        print("[*] FOUND JNI_OnLoad\n")
 
     print("[*] JNI FUNCTIONS (Java_*)")
     if not jni_syms:
@@ -120,16 +119,12 @@ def main():
     if not resources_dir.exists():
         sys.exit("Provided path does not exist")
 
-    print("[*] SCANNING RESOURCES FOR NATIVE LIBRARIES...\n")
-
     target_so = pick_target_so(resources_dir)
     if not target_so:
         sys.stdout.flush()
         return
 
     analyze_lib(target_so)
-
-    print("[*] ANALYSIS COMPLETE\n")
 
 
 if __name__ == "__main__":

@@ -22,8 +22,6 @@ STRINGS_PATTERNS = [
 ]
 
 
-print("[*] EXTRACTING STRINGS FROM RESOURCES...\n")
-
 RESOURCE_EXTENSIONS = ['.dex', '.so', '.png', '.jpg', '.gif', '.ttf', '.otf', '.bin', '.dat']
 resource_files = []
 
@@ -54,5 +52,3 @@ for res_file in resource_files:
                     print(f"\t[*] STRING: '{match}'")
                     print(f"\t[*] OF PATTERN: '{pattern}'")
             print()
-
-print("[*] EXTRACTION COMPLETE")

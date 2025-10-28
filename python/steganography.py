@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import sys
 import os
-import math
+import sys
 
-"""Minimal resource tamper checker."""
+"""Minimal resource tamper/steganography checker."""
 
-ENTROPY_UNMISTAKABLE = 7.9   # >= -> high-confidence dangerous
-ENTROPY_SUSPICIOUS = 7.5     # >= -> suspicious if other flags present
-BPP_SUSPICIOUS = 10.0        # bytes per pixel suspicious threshold
-TAIL_SCAN = 1024 * 1024      # how many bytes from end to scan for embedded archives
+
+TAIL_SCAN = 1024 * 1024
 HEADER_READ = 4096
+SAMPLE_CHUNK = 131072
 
 MAGICS = [
     (b"\x89PNG\r\n\x1a\n", "PNG"),
@@ -21,7 +19,6 @@ MAGICS = [
     (b"dex\n035", "DEX"),
     (b"\x7fELF", "ELF"),
     (b"MZ", "PE/MZ"),
-    (b"Rar!\x1a\x07", "RAR"),
 ]
 
 EMBED_SIGNATURES = [
@@ -31,25 +28,16 @@ EMBED_SIGNATURES = [
     (b"MZ", "PE/MZ"),
 ]
 
+try:
+    from PIL import Image
+except Exception:
+    Image = None
 
-def shannon_entropy_bytes(data: bytes) -> float:
-    if not data:
-        return 0.0
-    freq = [0] * 256
-    for b in data:
-        freq[b] += 1
-    length = len(data)
-    ent = 0.0
-    for f in freq:
-        if f == 0:
-            continue
-        p = f / length
-        ent -= p * math.log2(p)
-    return ent
 
 def read_initial(path: str, n: int = HEADER_READ) -> bytes:
     with open(path, "rb") as f:
         return f.read(n)
+
 
 def read_tail(path: str, n: int = TAIL_SCAN) -> bytes:
     size = os.path.getsize(path)
@@ -59,6 +47,33 @@ def read_tail(path: str, n: int = TAIL_SCAN) -> bytes:
         toread = min(n, size)
         f.seek(size - toread)
         return f.read(toread)
+
+
+def detect_magic(header_bytes: bytes) -> str | None:
+    for sig, name in MAGICS:
+        if header_bytes.startswith(sig):
+            return name
+    return None
+
+
+def try_image_dimensions(path: str) -> tuple[int|None, int|None]:
+    if Image is None:
+        return None, None
+    try:
+        with Image.open(path) as im:
+            return im.width, im.height
+    except Exception:
+        return None, None
+
+
+def bytes_per_pixel(filesize: int, w: int | None, h: int | None) -> float | None:
+    if not w or not h:
+        return None
+    pixels = w * h
+    if pixels == 0:
+        return None
+    return filesize / pixels
+
 
 def scan_for_embedded(path: str, signatures=EMBED_SIGNATURES, max_scan=TAIL_SCAN):
     found = []
@@ -79,30 +94,6 @@ def scan_for_embedded(path: str, signatures=EMBED_SIGNATURES, max_scan=TAIL_SCAN
                 found.append((name, base + idx))
     return found
 
-def detect_magic(header_bytes: bytes) -> str | None:
-    for sig, name in MAGICS:
-        if header_bytes.startswith(sig):
-            return name
-    return None
-
-def try_image_dimensions(path: str):
-    try:
-        from PIL import Image
-    except Exception:
-        return None, None
-    try:
-        with Image.open(path) as im:
-            return im.width, im.height
-    except Exception:
-        return None, None
-
-def bytes_per_pixel(filesize: int, w: int | None, h: int | None):
-    if not w or not h:
-        return None
-    pixels = w * h
-    if pixels == 0:
-        return None
-    return filesize / pixels
 
 def pretty_bytes(n: int) -> str:
     for unit in ("B","KB","MB","GB"):
@@ -115,17 +106,15 @@ def pretty_bytes(n: int) -> str:
 def analyze_file(path: str) -> dict:
     entry = {
         "path": path,
-        "filesize": os.path.getsize(path),
+        "filesize": os.path.getsize(path) if os.path.exists(path) else 0,
         "magic": None,
         "extension": os.path.splitext(path)[1].lower(),
-        "entropy": None,
         "w": None,
         "h": None,
         "bpp": None,
         "embedded": [],
         "reasons": [],
-        "score": 0,
-        "category": "normal",
+        "class": "normal",
     }
 
     if entry["filesize"] == 0:
@@ -135,159 +124,82 @@ def analyze_file(path: str) -> dict:
     header = read_initial(path)
     entry["magic"] = detect_magic(header) or "UNKNOWN"
 
-    size = entry["filesize"]
-    # entropy: sample for large files to avoid huge memory use
-    if size <= 5 * 1024 * 1024:
-        with open(path, "rb") as f:
-            data_all = f.read()
-        ent = shannon_entropy_bytes(data_all)
-    else:
-        with open(path, "rb") as f:
-            head = f.read(131072)
-            f.seek(size // 2)
-            mid = f.read(131072)
-            f.seek(max(0, size - 131072))
-            tail = f.read(131072)
-        ent = shannon_entropy_bytes(head + mid + tail)
-        entry["reasons"].append("entropy sampled (large file)")
-    entry["entropy"] = ent
-
     w, h = try_image_dimensions(path)
     entry["w"], entry["h"] = w, h
     if w and h:
-        entry["bpp"] = bytes_per_pixel(size, w, h)
+        entry["bpp"] = bytes_per_pixel(entry["filesize"], w, h)
 
     embedded = scan_for_embedded(path)
     entry["embedded"] = embedded
     if embedded:
         for name, offset in embedded:
             entry["reasons"].append(f"found {name} at offset 0x{offset:x}")
-            if name in ("DEX", "ELF", "PE/MZ"):
-                entry["score"] += 5
-            else:
-                entry["score"] += 3
 
-    # basic ext -> magic expectation
-    ext_map = {
-        ".png": "PNG",
-        ".jpg": "JPEG",
-        ".jpeg": "JPEG",
-        ".gif": "GIF",
-        ".webp": "RIFF/WEBP",
-        ".xml": None,
-        ".arsc": None,
-        ".txt": None,
-        ".ttf": None,
-        ".otf": None,
-        ".wav": None,
-        ".mp3": None,
-    }
-    expected = ext_map.get(entry["extension"])
-    if expected and entry["magic"] != expected:
-        entry["reasons"].append(f"extension {entry['extension']} but magic {entry['magic']}")
-        entry["score"] += 2
-
-    # entropy rules
-    if ent >= ENTROPY_UNMISTAKABLE:
-        entry["reasons"].append(f"entropy {ent:.3f} >= {ENTROPY_UNMISTAKABLE} (unmistakable)")
-        entry["score"] += 4
-    elif ent >= ENTROPY_SUSPICIOUS:
-        entry["reasons"].append(f"entropy {ent:.3f} >= {ENTROPY_SUSPICIOUS}")
-        entry["score"] += 1
-
-    # bpp rule
-    if entry["bpp"] is not None and entry["bpp"] >= BPP_SUSPICIOUS:
-        entry["reasons"].append(f"bytes_per_pixel {entry['bpp']:.2f} >= {BPP_SUSPICIOUS}")
-        entry["score"] += 2
-
-    # check for signature files in tail if ZIP found
     if any(e[0] == "ZIP" for e in embedded):
         tail = read_tail(path, TAIL_SCAN)
         if b"META-INF/" in tail or b"MANIFEST.MF" in tail or b".RSA" in tail or b".SF" in tail:
             entry["reasons"].append("embedded ZIP/JAR with META-INF / signature files")
-            entry["score"] += 1
-            entry["category"] = "signature"
+            entry["class"] = "signature"
+            return entry
 
-    # final classification if not already signature
-    if entry["category"] != "signature":
-        if entry["score"] >= 6:
-            entry["category"] = "dangerous"
-        elif entry["score"] >= 3:
-            entry["category"] = "suspicious"
-        else:
-            entry["category"] = "normal"
+    if any(e[0] in ("DEX", "ELF", "PE/MZ") for e in embedded):
+        entry["reasons"].append("embedded executable (DEX/ELF/PE)")
+        entry["class"] = "dangerous"
+        return entry
+
+    ext_map = {".png": "PNG", ".jpg": "JPEG", ".jpeg": "JPEG", ".gif": "GIF", ".webp": "RIFF/WEBP"}
+    expected = ext_map.get(entry["extension"]) if entry["extension"] else None
+    if expected and entry["magic"] != expected:
+        entry["reasons"].append(f"extension {entry['extension']} but magic {entry['magic']}")
+        entry["class"] = "dangerous"
+        return entry
+
+    if entry["bpp"] is not None and entry["bpp"] > 5.0:
+        entry["reasons"].append(f"bytes_per_pixel {entry['bpp']:.2f} > 5.0 (way too big for pixel dimensions)")
+        entry["class"] = "dangerous"
+        return entry
 
     return entry
 
-def walk_and_analyze(root: str):
-    files = []
-    if os.path.isfile(root):
-        files = [root]
-    else:
-        for dirpath, _, filenames in os.walk(root):
-            for fn in filenames:
-                files.append(os.path.join(dirpath, fn))
-    results = []
-    for f in files:
-        try:
-            results.append(analyze_file(f))
-        except Exception as e:
-            # treat analysis errors as dangerous so they get inspected
-            results.append({
-                "path": f,
-                "filesize": os.path.getsize(f) if os.path.exists(f) else 0,
-                "magic": None,
-                "extension": os.path.splitext(f)[1].lower(),
-                "entropy": None,
-                "w": None, "h": None, "bpp": None,
-                "embedded": [], "reasons": [f"error:{e}"], "score": 999, "category": "dangerous"
-            })
-    return results
 
 def print_report(results: list[dict]):
-    dangerous = [r for r in results if r["category"] == "dangerous"]
-    signature = [r for r in results if r["category"] == "signature"]
-    normal = [r for r in results if r["category"] == "normal"]
-    suspicious = [r for r in results if r["category"] == "suspicious"]
+    dangerous = [r for r in results if r["class"] == "dangerous"]
+    signature = [r for r in results if r["class"] == "signature"]
+    normal = [r for r in results if r["class"] == "normal"]
 
-    total_d = len(dangerous)
-    total_sg = len(signature)
-    total_n = len(normal) + len(suspicious)
-
-    print(f"TOTAL: {total_d} dangerous, {total_sg} signature, {total_n} normal\n")
-    sys.stdout.flush()
+    print(f"TOTAL: {len(dangerous)} dangerous, {len(signature)} signature, {len(normal)} normal")
+    print()
 
     print("[*] NORMAL (including suspicious)")
-    for r in normal + suspicious:
-        size = pretty_bytes(r["filesize"])
-        print(f"\t[*] {r['path']} ({r['magic']}) — {size}")
+    for r in normal:
+        print(f"\t[*] {r['path']} ({r['magic']}) — {pretty_bytes(r['filesize'])}")
     print()
-    sys.stdout.flush()
 
-    print("[*] SIGNATURE FILES (require signature match - likely system/repackaged)")
+    print("[*] SIGNATURE FILES (require signature match - so usually needs to be system app)")
     for r in signature:
-        size = pretty_bytes(r["filesize"])
-        reasons = "; ".join(r["reasons"]) if r["reasons"] else ""
-        print(f"\t[*] {r['path']} ({r['magic']}) — {size}")
-        if reasons:
-            print(f"\t\t-> reason: {reasons}")
+        print(f"\t[*] {r['path']} ({r['magic']}) — {pretty_bytes(r['filesize'])}")
+        if r["reasons"]:
+            print(f"\t\t-> reason: {'; '.join(r['reasons'])}")
     print()
-    sys.stdout.flush()
 
     print("[*] DANGEROUS FILES")
     for r in dangerous:
-        size = pretty_bytes(r["filesize"])
-        reasons = "; ".join(r["reasons"]) if r["reasons"] else ""
-        extra = ""
-        if r["w"] and r["h"]:
-            extra = f" w{r['w']}x{r['h']} bpp={r['bpp']:.2f}" if r["bpp"] else f" w{r['w']}x{r['h']}"
-        print(f"\t[*] {r['path']} ({r['magic']}) — {size}{extra}")
-        if reasons:
-            print(f"\t\t-> reason: {reasons}")
+        extra = f" w{r['w']}x{r['h']} bpp={r['bpp']:.2f}" if r['w'] and r['h'] and r['bpp'] else ""
+        print(f"\t[*] {r['path']} ({r['magic']}) — {pretty_bytes(r['filesize'])}{extra}")
+        if r["reasons"]:
+            print(f"\t\t-> reason: {'; '.join(r['reasons'])}")
     print()
-    sys.stdout.flush()
 
-if __name__ == "__main__":
+
+def walk_and_analyze(root: str):
+    files = [root] if os.path.isfile(root) else [os.path.join(dp, f) for dp, _, fs in os.walk(root) for f in fs]
+    return [analyze_file(f) for f in files]
+
+
+def main():
     root = sys.argv[1] if len(sys.argv) > 1 else "."
     results = walk_and_analyze(root)
     print_report(results)
+
+if __name__ == "__main__":
+    main()
