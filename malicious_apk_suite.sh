@@ -36,11 +36,11 @@ echo -e "[*] GREPPING PATTERNS IN SOURCE...\n"
 echo -e "[*] SEARCHING FOR STRINGS IN RESOURCES...\n"
 ./python/strings.py "$PWD/jadx/resources" > results/strings.txt
 
-# echo -e "[*] SEARCHING FOR PAYLOADS IN RESOURCES...\n"
-# ./static/python/steganography.py "$PWD/jadx/resources" > steganography.txt
+echo -e "[*] SEARCHING FOR PAYLOADS IN RESOURCES...\n"
+./python/steganography.py "$PWD/jadx/resources" > steganography.txt
 
 echo -e "[*] ANALYZING NATIVE LIBRARIES...\n"
-./static/python/native_libs.py "$PWD/jadx/resources" > native_libraries.txt
+./python/native_libs.py "$PWD/jadx/resources" > native_libraries.txt
 
 echo -e "[*] LAUNCHING GUI...\n"
 ./python/ui.py &
