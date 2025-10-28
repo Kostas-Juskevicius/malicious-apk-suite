@@ -1,0 +1,1741 @@
+# Complete Android Permissions Reference - All Permissions
+
+## LOCATION PERMISSIONS
+
+ACCESS_FINE_LOCATION
+- What it does: Lets app get precise GPS location from GPS, WiFi, cell towers
+- Protection: dangerous
+- Use case: Navigation apps, location-based services
+
+ACCESS_COARSE_LOCATION
+- What it does: Lets app get approximate location (city block level) from network
+- Protection: dangerous
+- Use case: Weather apps, local news
+
+ACCESS_BACKGROUND_LOCATION
+- What it does: Lets app access location when app is not visible to user
+- Protection: dangerous (hard restricted - installer must allowlist)
+- Note: Must also request FINE or COARSE location
+- Use case: Fitness trackers, delivery apps
+
+ACCESS_MEDIA_LOCATION
+- What it does: Lets app read GPS coordinates embedded in photos/videos (EXIF data)
+- Protection: dangerous
+- Use case: Photo organization apps
+
+ACCESS_LOCATION_EXTRA_COMMANDS
+- What it does: Lets app send special commands to location providers
+- Protection: normal
+- Use case: Advanced location features
+
+INSTALL_LOCATION_PROVIDER
+- What it does: Install a custom location provider into Location Manager
+- Protection: signature|privileged (system apps only)
+- Use case: Custom location sources
+
+CONTROL_LOCATION_UPDATES
+- What it does: Enable/disable location update notifications from radio
+- Protection: signature|privileged (system apps only)
+- Use case: System location management
+
+LOCATION_HARDWARE
+- What it does: Use location features in hardware like geofencing API
+- Protection: signature|privileged (system apps only)
+- Use case: Hardware-based geofencing
+
+## PHONE & CALLING PERMISSIONS
+
+CALL_PHONE
+- What it does: App can dial phone numbers directly without showing dialer UI
+- Protection: dangerous
+- Note: Can also trigger carrier MMI codes (call forwarding, call waiting)
+- Use case: Auto-dialers, emergency apps
+
+CALL_PRIVILEGED
+- What it does: Call any phone number including emergency numbers without dialer UI
+- Protection: signature|privileged (system apps only)
+- Use case: System dialer apps
+
+ANSWER_PHONE_CALLS
+- What it does: App can programmatically answer incoming calls
+- Protection: dangerous
+- Use case: Bluetooth headsets, accessibility apps
+
+READ_PHONE_STATE
+- What it does: Access to cellular network info, current call status, phone accounts
+- Protection: dangerous
+- Info exposed: Network type, software version, ongoing calls, PhoneAccount list
+- Use case: Network diagnostics, call management
+
+READ_PHONE_NUMBERS
+- What it does: Read device's phone numbers (exposed to instant apps)
+- Protection: dangerous
+- Use case: Account verification, contact sync
+
+READ_PRECISE_PHONE_STATE
+- What it does: Read precise phone state details
+- Protection: signature|privileged (system apps only)
+- Use case: System telephony services
+
+ACCEPT_HANDOVER
+- What it does: Lets app continue a call that started in a different app
+- Protection: dangerous
+- Use case: Video call apps taking over voice calls
+
+CALL_COMPANION_APP
+- What it does: Marks app as eligible to be a calling companion via InCallService
+- Protection: normal
+- Use case: Call screening apps, call recorders
+
+MANAGE_OWN_CALLS
+- What it does: Manage own calls through self-managed ConnectionService
+- Protection: normal
+- Use case: VOIP apps, third-party calling apps
+
+MODIFY_PHONE_STATE
+- What it does: Modify telephony state - power on, MMI, etc.
+- Protection: signature|privileged (system apps only)
+- Use case: System telephony management
+
+USE_SIP
+- What it does: Use SIP service for internet calling
+- Protection: dangerous
+- Use case: SIP/VOIP applications
+
+PROCESS_OUTGOING_CALLS (DEPRECATED API 29)
+- What it does: Monitor and redirect outgoing calls
+- Protection: dangerous (deprecated - use CallRedirectionService)
+- Use case: Call blocking apps (legacy)
+
+## SMS & MESSAGING PERMISSIONS
+
+SEND_SMS
+- What it does: App can send SMS messages without user clicking send
+- Protection: dangerous
+- Use case: Verification code senders, automated messaging
+
+RECEIVE_SMS
+- What it does: App gets notified when SMS arrives and can read it
+- Protection: dangerous
+- Use case: SMS backup, spam filters, auto-OTP readers
+
+READ_SMS
+- What it does: App can read all stored SMS messages
+- Protection: dangerous
+- Use case: SMS backup apps, message search
+
+RECEIVE_MMS
+- What it does: App monitors incoming MMS (picture messages)
+- Protection: dangerous
+- Use case: Custom messaging apps
+
+RECEIVE_WAP_PUSH
+- What it does: Receive WAP PUSH messages
+- Protection: dangerous
+- Use case: Carrier messaging services
+
+BROADCAST_SMS
+- What it does: Broadcast SMS receipt notification
+- Protection: signature|privileged (system apps only)
+- Use case: System SMS handling
+
+BROADCAST_WAP_PUSH
+- What it does: Broadcast WAP PUSH receipt notification
+- Protection: signature|privileged (system apps only)
+- Use case: System WAP PUSH handling
+
+RESPOND_VIA_MESSAGE
+- What it does: Send respond-via-message during incoming calls
+- Protection: signature|privileged (system apps only)
+- Use case: Quick reply to calls
+
+## CONTACTS & CALENDAR PERMISSIONS
+
+READ_CONTACTS
+- What it does: Read all contact names, numbers, emails, addresses
+- Protection: dangerous
+- Use case: Contact management, communication apps
+
+WRITE_CONTACTS
+- What it does: Create, modify, delete contacts
+- Protection: dangerous
+- Use case: Contact sync, CRM apps
+
+READ_CALENDAR
+- What it does: Read all calendar events, attendees, notes
+- Protection: dangerous
+- Use case: Calendar widgets, scheduling apps
+
+WRITE_CALENDAR
+- What it does: Create, modify, delete calendar events
+- Protection: dangerous
+- Use case: Calendar management, meeting schedulers
+
+READ_CALL_LOG
+- What it does: Access complete call history (incoming, outgoing, missed)
+- Protection: dangerous
+- Use case: Call analytics, backup apps
+
+WRITE_CALL_LOG
+- What it does: Modify and read call log entries
+- Protection: dangerous
+- Use case: Call log management, VOIP apps adding entries
+
+GET_ACCOUNTS
+- What it does: See list of all accounts (Google, Facebook, etc.) on device
+- Protection: dangerous
+- Note: Since API 23, apps can access accounts from their own authenticator without this
+- Use case: Single sign-on, account management
+
+GET_ACCOUNTS_PRIVILEGED
+- What it does: Privileged access to accounts list
+- Protection: signature|privileged (system apps only)
+- Use case: System account management
+
+ACCOUNT_MANAGER
+- What it does: Call into AccountAuthenticators
+- Protection: signature|privileged (system apps only)
+- Use case: System account services
+
+## STORAGE & MEDIA PERMISSIONS
+
+READ_EXTERNAL_STORAGE
+- What it does: Read files from shared storage (SD card, downloads)
+- Protection: dangerous
+- Use case: File managers, photo viewers
+
+WRITE_EXTERNAL_STORAGE
+- What it does: Write files to shared storage
+- Protection: dangerous
+- Use case: File downloads, photo editors
+
+MANAGE_EXTERNAL_STORAGE
+- What it does: Broad access to all files in external storage (scoped storage bypass)
+- Protection: special (requires user approval in Settings)
+- Use case: File managers, backup apps
+
+MANAGE_MEDIA
+- What it does: Delete or modify photos/videos/audio without showing user confirmation dialog
+- Protection: special
+- Use case: Gallery apps, media cleaners
+
+READ_MEDIA_AUDIO
+- What it does: Read audio files from external storage (Android 13+)
+- Protection: dangerous
+- Use case: Music players, audio editors
+
+READ_MEDIA_IMAGES
+- What it does: Read image files from external storage (Android 13+)
+- Protection: dangerous
+- Use case: Photo galleries, image editors
+
+READ_MEDIA_VIDEO
+- What it does: Read video files from external storage (Android 13+)
+- Protection: dangerous
+- Use case: Video players, video editors
+
+READ_MEDIA_VISUAL_USER_SELECTED
+- What it does: Read user-selected images/videos via photo picker
+- Protection: dangerous
+- Use case: Apps using photo picker
+
+MOUNT_UNMOUNT_FILESYSTEMS
+- What it does: Mount and unmount filesystems for removable storage
+- Protection: signature|privileged (system apps only)
+- Use case: System storage management
+
+MOUNT_FORMAT_FILESYSTEMS
+- What it does: Format filesystems for removable storage
+- Protection: signature|privileged (system apps only)
+- Use case: System storage formatting
+
+ACCESS_BLOBS_ACROSS_USERS
+- What it does: Access data blobs across different user profiles
+- Protection: signature|privileged (system apps only)
+- Use case: Multi-user data sharing
+
+MANAGE_DOCUMENTS
+- What it does: Manage access to documents, usually as part of document picker
+- Protection: signature (system apps only)
+- Use case: Document provider services
+
+## CAMERA & MICROPHONE PERMISSIONS
+
+CAMERA
+- What it does: Open and use any camera on device
+- Protection: dangerous
+- Note: Automatically adds <uses-feature> for camera in manifest
+- Use case: Photo apps, video recording, QR scanners
+
+RECORD_AUDIO
+- What it does: Capture audio from microphone
+- Protection: dangerous
+- Use case: Voice recorders, video recording, voice chat
+
+CAPTURE_AUDIO_OUTPUT
+- What it does: Capture audio output (system audio playback)
+- Protection: signature|privileged (system apps only)
+- Note: For capturing USAGE_UNKNOWN, USAGE_MEDIA, or USAGE_GAME
+- Use case: Screen recorders, system audio capture
+
+## SENSORS & ACTIVITY PERMISSIONS
+
+BODY_SENSORS
+- What it does: Access heart rate monitors, body temperature sensors
+- Protection: dangerous
+- Use case: Fitness apps, health monitoring
+
+BODY_SENSORS_BACKGROUND
+- What it does: Access body sensors when app is in background
+- Protection: dangerous (hard restricted - installer must allowlist)
+- Note: Requires BODY_SENSORS permission too
+- Use case: Continuous health monitoring
+
+ACTIVITY_RECOGNITION
+- What it does: Detect walking, running, cycling, driving, still
+- Protection: dangerous
+- Use case: Fitness trackers, step counters
+
+HIGH_SAMPLING_RATE_SENSORS
+- What it does: Access accelerometer/gyroscope data faster than 200 Hz
+- Protection: normal
+- Use case: Motion analysis, gaming
+
+## BLUETOOTH PERMISSIONS
+
+BLUETOOTH
+- What it does: Connect to paired bluetooth devices (legacy, pre-Android 12)
+- Protection: normal
+- Use case: Legacy Bluetooth apps
+
+BLUETOOTH_ADMIN
+- What it does: Discover and pair bluetooth devices (legacy, pre-Android 12)
+- Protection: normal
+- Use case: Legacy Bluetooth pairing
+
+BLUETOOTH_CONNECT
+- What it does: Connect to already-paired Bluetooth devices (Android 12+)
+- Protection: dangerous
+- Use case: Connecting to headphones, speakers, wearables
+
+BLUETOOTH_SCAN
+- What it does: Discover and pair with nearby Bluetooth devices (Android 12+)
+- Protection: dangerous
+- Use case: Device pairing, finding Bluetooth accessories
+
+BLUETOOTH_ADVERTISE
+- What it does: Make device discoverable to other Bluetooth devices (Android 12+)
+- Protection: dangerous
+- Use case: Peer-to-peer apps, device sharing
+
+BLUETOOTH_PRIVILEGED
+- What it does: Pair devices without user interaction, manage phonebook/message access
+- Protection: signature|privileged (system apps only)
+- Use case: System Bluetooth management
+
+## NETWORK & INTERNET PERMISSIONS
+
+INTERNET
+- What it does: Open network sockets, make HTTP requests, download data
+- Protection: normal
+- Use case: Nearly all apps that use the internet
+
+ACCESS_NETWORK_STATE
+- What it does: Check if WiFi/mobile data is connected, network type
+- Protection: normal
+- Use case: Apps that need to know connectivity status
+
+ACCESS_WIFI_STATE
+- What it does: View WiFi connection info (SSID, signal strength)
+- Protection: normal
+- Use case: Network diagnostics, WiFi managers
+
+CHANGE_NETWORK_STATE
+- What it does: Change mobile data connectivity state
+- Protection: normal
+- Use case: Data management apps
+
+CHANGE_WIFI_STATE
+- What it does: Connect/disconnect WiFi, add networks
+- Protection: normal
+- Use case: WiFi management apps
+
+CHANGE_WIFI_MULTICAST_STATE
+- What it does: Enter Wi-Fi Multicast mode
+- Protection: normal
+- Use case: Network discovery, mDNS services
+
+OVERRIDE_WIFI_CONFIG
+- What it does: Modify any wifi configuration, even if created by another app
+- Protection: signature|privileged (system apps only)
+- Use case: System WiFi management
+
+WIFI_SET_DEVICE_MOBILITY_STATE
+- What it does: Indicate device mobility state for WiFi optimization
+- Protection: signature|privileged (system apps only)
+- Use case: System power management
+
+CONFIGURE_WIFI_DISPLAY
+- What it does: Configure and connect to WiFi displays (Miracast)
+- Protection: signature|privileged (system apps only)
+- Use case: Screen mirroring
+
+NEARBY_WIFI_DEVICES
+- What it does: Advertise to and connect with nearby devices via WiFi Direct/WiFi Aware
+- Protection: dangerous
+- Use case: Peer-to-peer file sharing, local multiplayer games
+
+MANAGE_WIFI_INTERFACES
+- What it does: Get notified when WiFi interface request conflicts arise
+- Protection: signature|privileged (system apps only)
+- Use case: System WiFi arbitration
+
+MANAGE_WIFI_NETWORK_SELECTION
+- What it does: Subset of privileged WiFi APIs for trusted OEM apps
+- Protection: signature|privileged (system apps only)
+- Use case: Carrier WiFi optimization
+
+NFC
+- What it does: Read/write NFC tags, communicate via NFC
+- Protection: normal
+- Use case: Payment apps, NFC tag readers
+
+NFC_PREFERRED_PAYMENT_INFO
+- What it does: Receive NFC preferred payment service information
+- Protection: normal
+- Use case: Payment service apps
+
+NFC_TRANSACTION_EVENT
+- What it does: Receive NFC transaction events
+- Protection: normal
+- Use case: Payment processing apps
+
+## NOTIFICATIONS & UI PERMISSIONS
+
+POST_NOTIFICATIONS
+- What it does: Show notifications to the user (Android 13+)
+- Protection: dangerous
+- Note: Before Android 13, apps could post notifications freely
+- Use case: All apps that show notifications
+
+ACCESS_NOTIFICATION_POLICY
+- What it does: Read and modify Do Not Disturb settings
+- Protection: normal
+- Note: Not supported on managed profiles
+- Use case: Automation apps, custom DND managers
+
+SYSTEM_ALERT_WINDOW
+- What it does: Draw overlays on top of other apps (chat heads, floating buttons)
+- Protection: signature|setup|installer|appop|pre23 (special - requires user approval)
+- Use case: Messenger chat heads, screen filters, accessibility overlays
+
+EXPAND_STATUS_BAR
+- What it does: Programmatically pull down or collapse notification shade
+- Protection: normal
+- Use case: Automation apps, launchers
+
+HIDE_OVERLAY_WINDOWS
+- What it does: Prevent non-system overlay windows from being drawn on top of app
+- Protection: normal
+- Use case: Security-sensitive apps
+
+STATUS_BAR
+- What it does: Open, close, or disable status bar and icons
+- Protection: signature|privileged (system apps only)
+- Use case: System UI management
+
+## FOREGROUND SERVICES PERMISSIONS
+
+FOREGROUND_SERVICE
+- What it does: Allow app to run a foreground service (shows persistent notification)
+- Protection: normal
+- Use case: Music players, navigation, file downloads
+
+FOREGROUND_SERVICE_CAMERA
+- What it does: Run foreground service that uses camera
+- Protection: normal|instant
+- Use case: Video recording apps, security cameras
+
+FOREGROUND_SERVICE_CONNECTED_DEVICE
+- What it does: Run foreground service for connected device management
+- Protection: normal|instant
+- Use case: Bluetooth device managers, wearable apps
+
+FOREGROUND_SERVICE_DATA_SYNC
+- What it does: Run foreground service for data synchronization
+- Protection: normal|instant
+- Use case: Cloud sync apps, backup services
+
+FOREGROUND_SERVICE_HEALTH
+- What it does: Run foreground service for health/fitness tracking
+- Protection: normal|instant
+- Use case: Workout apps, health monitors
+
+FOREGROUND_SERVICE_LOCATION
+- What it does: Run foreground service that accesses location
+- Protection: normal|instant
+- Use case: Navigation apps, fitness trackers
+
+FOREGROUND_SERVICE_MEDIA_PLAYBACK
+- What it does: Run foreground service for media playback
+- Protection: normal|instant
+- Use case: Music players, podcast apps
+
+FOREGROUND_SERVICE_MEDIA_PROCESSING
+- What it does: Run foreground service for media processing (transcoding, effects)
+- Protection: normal|instant
+- Use case: Video editors, audio processors
+
+FOREGROUND_SERVICE_MEDIA_PROJECTION
+- What it does: Run foreground service for screen recording/casting
+- Protection: normal|instant
+- Use case: Screen recorders, casting apps
+
+FOREGROUND_SERVICE_MICROPHONE
+- What it does: Run foreground service that uses microphone
+- Protection: normal|instant
+- Use case: Voice recorders, live streaming
+
+FOREGROUND_SERVICE_PHONE_CALL
+- What it does: Run foreground service for ongoing phone calls
+- Protection: normal|instant
+- Use case: VOIP apps, call management
+
+FOREGROUND_SERVICE_REMOTE_MESSAGING
+- What it does: Run foreground service for remote messaging
+- Protection: normal|instant
+- Use case: Chat apps, messaging services
+
+FOREGROUND_SERVICE_SPECIAL_USE
+- What it does: Run foreground service with special use justification
+- Protection: normal|appop|instant
+- Note: Requires explanation of use case
+- Use case: Apps with unique requirements
+
+FOREGROUND_SERVICE_SYSTEM_EXEMPTED
+- What it does: Run foreground service exempt from some system restrictions
+- Protection: normal|instant
+- Note: Only for specific use cases listed in ServiceInfo docs
+- Use case: System-critical services
+
+INSTANT_APP_FOREGROUND_SERVICE
+- What it does: Allow instant app to create foreground services
+- Protection: signature|development|instant|appop
+- Use case: Instant apps needing foreground services
+
+START_FOREGROUND_SERVICES_FROM_BACKGROUND
+- What it does: Start foreground services from background at any time
+- Protection: signature|privileged|appop (system apps only)
+- Use case: System services
+
+## SYSTEM & DEVICE PERMISSIONS
+
+WAKE_LOCK
+- What it does: Prevent CPU from sleeping or screen from dimming
+- Protection: normal
+- Use case: Alarm apps, video players, navigation
+
+VIBRATE
+- What it does: Make device vibrate
+- Protection: normal
+- Use case: Haptic feedback, notifications
+
+DISABLE_KEYGUARD
+- What it does: Dismiss lock screen (only if not secured with PIN/pattern/password)
+- Protection: normal
+- Use case: Alarm apps, trusted environment apps
+
+SET_WALLPAPER
+- What it does: Change device wallpaper
+- Protection: normal
+- Use case: Wallpaper apps, launchers
+
+SET_WALLPAPER_HINTS
+- What it does: Set wallpaper hints (scrolling behavior, etc.)
+- Protection: normal
+- Use case: Live wallpapers, launchers
+
+SET_TIME
+- What it does: Set system time directly
+- Protection: signature|privileged (system apps only)
+- Use case: System time management
+
+SET_TIME_ZONE
+- What it does: Set system time zone directly
+- Protection: signature|privileged (system apps only)
+- Use case: System timezone management
+
+REBOOT
+- What it does: Reboot the device
+- Protection: signature|privileged (system apps only)
+- Use case: System update apps
+
+FLASHLIGHT
+- What it does: Control device flashlight/LED (IR transmitter)
+- Protection: normal
+- Use case: Flashlight apps, camera apps
+
+TRANSMIT_IR
+- What it does: Use device's IR transmitter if available
+- Protection: normal
+- Use case: IR remote control apps
+
+SET_ALARM
+- What it does: Broadcast Intent to set an alarm for the user
+- Protection: normal
+- Use case: Apps that need to set alarms
+
+TURN_SCREEN_ON
+- What it does: Turn on the screen (e.g., with Activity.setTurnScreenOn)
+- Protection: normal
+- Use case: Alarm apps, incoming call screens
+
+CHANGE_CONFIGURATION
+- What it does: Modify current configuration (locale, display settings)
+- Protection: signature|privileged|development
+- Use case: System configuration management
+
+KILL_BACKGROUND_PROCESSES
+- What it does: Call ActivityManager.killBackgroundProcesses()
+- Protection: normal
+- Note: As of Android 14, only kills caller's own processes for third-party apps
+- Use case: Task managers, memory cleaners
+
+REORDER_TASKS
+- What it does: Change Z-order of tasks (task stacking)
+- Protection: normal
+- Use case: Task managers, launchers
+
+RESTART_PACKAGES (DEPRECATED API 15)
+- What it does: Kill application processes (use killBackgroundProcesses instead)
+- Protection: deprecated
+- Use case: Legacy task managers
+
+SET_ANIMATION_SCALE
+- What it does: Modify global animation scaling factor
+- Protection: signature|privileged|development
+- Use case: Developer tools
+
+SET_DEBUG_APP
+- What it does: Configure application for debugging
+- Protection: signature|privileged|development
+- Use case: Developer tools
+
+SET_PROCESS_LIMIT
+- What it does: Set maximum number of background processes
+- Protection: signature|privileged|development
+- Use case: Developer tools
+
+SET_ALWAYS_FINISH
+- What it does: Set whether activities are immediately finished when backgrounded
+- Protection: signature|privileged|development
+- Use case: Developer tools
+
+FORCE_STOP_PACKAGES
+- What it does: Send signal to force stop persistent processes
+- Protection: signature|privileged (system apps only)
+- Use case: System process management
+
+DUMP
+- What it does: Retrieve state dump information from system services
+- Protection: signature|privileged (system apps only)
+- Use case: Bug report generation
+
+FACTORY_TEST
+- What it does: Run as manufacturer test application with root privileges
+- Protection: signature (system apps only)
+- Note: Only available in manufacturer test mode
+- Use case: Factory testing
+
+MASTER_CLEAR (DEPRECATED API 15)
+- What it does: Factory reset device (deprecated, functionality removed)
+- Protection: deprecated
+- Use case: None (removed)
+
+BROADCAST_STICKY
+- What it does: Broadcast sticky intents (data held by system after broadcast)
+- Protection: normal
+- Use case: System state broadcasting
+
+BROADCAST_PACKAGE_REMOVED
+- What it does: Broadcast notification that package was removed
+- Protection: signature|privileged (system apps only)
+- Use case: System package management
+
+PERSISTENT_ACTIVITY (DEPRECATED API 15)
+- What it does: Make activities persistent (functionality being removed)
+- Protection: deprecated
+- Use case: None (deprecated)
+
+RECEIVE_BOOT_COMPLETED
+- What it does: Receive ACTION_BOOT_COMPLETED broadcast
+- Protection: normal
+- Use case: Apps that need to start on boot
+
+DIAGNOSTIC
+- What it does: Read/write to diagnostic resources
+- Protection: signature|privileged (system apps only)
+- Use case: System diagnostics
+
+CLEAR_APP_CACHE
+- What it does: Clear caches of all installed applications
+- Protection: signature|privileged (system apps only)
+- Use case: System storage management
+
+DELETE_CACHE_FILES
+- What it does: Old permission for deleting cache files (no longer used, quietly ignored)
+- Protection: signature|privileged (system apps only)
+- Use case: Legacy (ignored)
+
+## INSTALLATION & PACKAGE PERMISSIONS
+
+REQUEST_INSTALL_PACKAGES
+- What it does: Show install prompt to install APK files
+- Protection: signature|appop (requires user approval in Settings)
+- Use case: App stores, enterprise app deployment
+
+REQUEST_DELETE_PACKAGES
+- What it does: Show uninstall prompt for packages
+- Protection: normal
+- Use case: App managers, cleaners
+
+INSTALL_PACKAGES
+- What it does: Install packages directly without user prompt
+- Protection: signature|privileged (system apps only)
+- Note: Starting in Android N, user confirmation requested if installer != package creator
+- Use case: System app installers
+
+DELETE_PACKAGES
+- What it does: Delete packages directly
+- Protection: signature|privileged (system apps only)
+- Use case: System package management
+
+INSTALL_SHORTCUT
+- What it does: Install a shortcut in Launcher
+- Protection: normal
+- Note: In Android O+, use ShortcutManager.requestPinShortcut() instead
+- Use case: App shortcuts (legacy)
+
+UNINSTALL_SHORTCUT
+- What it does: Uninstall shortcuts (deprecated)
+- Protection: normal (deprecated)
+- Use case: Legacy shortcut management
+
+GET_PACKAGE_SIZE
+- What it does: Check how much storage any app uses
+- Protection: normal
+- Use case: Storage analyzers
+
+QUERY_ALL_PACKAGES
+- What it does: See all installed apps, even if not declared in <queries>
+- Protection: normal
+- Use case: Launchers, app managers, security apps
+
+PACKAGE_USAGE_STATS
+- What it does: Access app usage statistics (screen time, last used)
+- Protection: signature|privileged|appop (requires user approval in Settings)
+- Declaring permission implies intention to use API
+- Use case: Screen time trackers, parental controls
+
+LOADER_USAGE_STATS
+- What it does: Data loader can read package access logs (pages referenced over time)
+- Protection: signature|privileged|appop
+- Note: Data loader must provide data to install app and have both permission + appop
+- Use case: Incremental install data loaders
+
+CHANGE_COMPONENT_ENABLED_STATE
+- What it does: Enable/disable application components (other than own)
+- Protection: signature|privileged (system apps only)
+- Use case: System component management
+
+BIND_APPWIDGET
+- What it does: Tell AppWidget service which apps can access AppWidget data
+- Protection: signature|privileged (system apps only)
+- Use case: System widget management
+
+ENFORCE_UPDATE_OWNERSHIP
+- What it does: Indicate intention to become update owner via PackageInstaller
+- Protection: normal
+- Use case: App stores managing updates
+
+## BIOMETRIC & SECURITY PERMISSIONS
+
+USE_BIOMETRIC
+- What it does: Use fingerprint, face unlock, iris scanner for authentication
+- Protection: normal
+- Use case: Banking apps, password managers
+
+USE_FINGERPRINT (DEPRECATED API 28)
+- What it does: Use fingerprint hardware (use USE_BIOMETRIC instead)
+- Protection: normal (deprecated)
+- Use case: Legacy fingerprint authentication
+
+SET_BIOMETRIC_DIALOG_ADVANCED
+- What it does: Set advanced features on BiometricDialog (logo, content view with more options)
+- Protection: signature|privileged (system apps only)
+- Use case: System biometric UI customization
+
+## ALARMS & SCHEDULING PERMISSIONS
+
+SCHEDULE_EXACT_ALARM
+- What it does: Set alarms that fire at exact times (Android 12+)
+- Protection: normal (but user can revoke in Settings)
+- Use case: Alarm clocks, calendar reminders
+
+USE_EXACT_ALARM
+- What it does: Use exact alarms like SCHEDULE_EXACT_ALARM with different exemption policy
+- Protection: normal
+- Use case: Calendar apps, medication reminders
+
+USER_INITIATED_JOBS
+- What it does: Use user-initiated jobs API for important user-requested work
+- Protection: normal
+- Use case: Long-running user-initiated tasks
+
+USE_FULL_SCREEN_INTENT
+- What it does: Use full screen intents (show activity over lock screen)
+- Protection: normal
+- Use case: Alarm apps, incoming call screens
+
+## BATTERY & POWER PERMISSIONS
+
+BATTERY_STATS
+- What it does: Read detailed battery usage statistics
+- Protection: signature|privileged|development
+- Use case: Battery monitoring apps (with debugging enabled)
+
+REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+- What it does: Request to be excluded from battery optimization (Doze/App Standby)
+- Protection: normal (but user must approve in Settings)
+- Use case: Alarm apps, messaging apps needing background reliability
+
+UPDATE_DEVICE_STATS
+- What it does: Update device statistics
+- Protection: signature|privileged (system apps only)
+- Use case: System statistics tracking
+
+## PICTURE & MEDIA CONTROL
+
+APPLY_PICTURE_PROFILE
+- What it does: Apply MediaQualityManager.PictureProfile to layers
+- Protection: signature|privileged (system apps only)
+- Use case: System media quality management
+
+MEDIA_CONTENT_CONTROL
+- What it does: Know what content is playing and control its playback
+- Protection: signature|privileged (system apps only)
+- Use case: System media controls
+
+MEDIA_ROUTING_CONTROL
+- What it does: Control routing of media apps (cast destinations)
+- Protection: signature|privileged (system apps only)
+- Use case: System media routing
+
+MODIFY_AUDIO_SETTINGS
+- What it does: Modify global audio settings (volume, routing)
+- Protection: normal
+- Use case: Volume controls, audio managers
+
+## CREDENTIAL MANAGER PERMISSIONS
+
+CREDENTIAL_MANAGER_QUERY_CANDIDATE_CREDENTIALS
+- What it does: Query metadata about credential candidates from prepareGetCredential
+- Protection: normal
+- Use case: Browser credential integration
+
+CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS
+- What it does: Specify candidate credential providers for queries/creates
+- Protection: normal
+- Use case: Credential provider selection
+
+CREDENTIAL_MANAGER_SET_ORIGIN
+- What it does: Invoke credential manager APIs on behalf of another RP (relying party)
+- Protection: normal
+- Use case: Browser acting as credential proxy
+
+## COMPANION DEVICE PERMISSIONS
+
+REQUEST_COMPANION_RUN_IN_BACKGROUND
+- What it does: Companion app can run in background
+- Protection: normal
+- Use case: Wearable companion apps
+
+REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND
+- What it does: Companion app can start foreground services from background
+- Protection: normal
+- Use case: Wearable companion apps
+
+REQUEST_COMPANION_USE_DATA_IN_BACKGROUND
+- What it does: Companion app can use data in background
+- Protection: normal
+- Use case: Wearable companion apps
+
+REQUEST_COMPANION_SELF_MANAGED
+- What it does: Create self-managed association with companion device
+- Protection: normal
+- Use case: Advanced companion device integrations
+
+REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE
+- What it does: Subscribe to companion device presence status changes
+- Protection: normal
+- Use case: Apps that need to know when companion device is nearby
+
+REQUEST_COMPANION_PROFILE_WATCH
+- What it does: Associate with watch capable of automotive projection
+- Protection: normal
+- Use case: Watch companion apps
+
+REQUEST_COMPANION_PROFILE_APP_STREAMING
+- What it does: Associate with device for streaming Android applications
+- Protection: normal
+- Use case: Remote desktop/streaming apps
+
+REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION
+- What it does: Associate with vehicle head unit for automotive projection (Android Auto)
+- Protection: normal
+- Use case: Android Auto apps
+
+REQUEST_COMPANION_PROFILE_COMPUTER
+- What it does: Associate with computer to share functionality/data (notifications, photos)
+- Protection: normal
+- Use case: Desktop companion apps
+
+REQUEST_COMPANION_PROFILE_GLASSES
+- What it does: Associate with smart glasses via CompanionDeviceManager
+- Protection: normal
+- Use case: Smart glasses companion apps
+
+REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING
+- What it does: Stream content from Android host to nearby device
+- Protection: normal
+- Use case: Content casting apps
+
+DELIVER_COMPANION_MESSAGES
+- What it does: Deliver companion messages to system
+- Protection: signature|privileged (system apps only)
+- Use case: System companion messaging
+
+## INTERACT ACROSS PROFILES
+
+INTERACT_ACROSS_PROFILES
+- What it does: Interaction across profiles in same profile group (work/personal)
+- Protection: normal
+- Use case: Cross-profile capable apps
+
+ACCESS_HIDDEN_PROFILES
+- What it does: Access profiles with PROFILE_API_VISIBILITY_HIDDEN (like private profiles)
+- Protection: normal
+- Use case: Apps needing private profile access
+
+## VOICEMAIL PERMISSIONS
+
+ADD_VOICEMAIL
+- What it does: Add voicemails into the system
+- Protection: dangerous
+- Use case: Voicemail apps
+
+READ_VOICEMAIL
+- What it does: Read voicemails in the system
+- Protection: signature|privileged (system apps only)
+- Use case: System voicemail management
+
+WRITE_VOICEMAIL
+- What it does: Modify and remove existing voicemails
+- Protection: signature|privileged (system apps only)
+- Use case: System voicemail management
+
+## SCREEN CAPTURE & RECORDING PERMISSIONS
+
+DETECT_SCREEN_CAPTURE
+- What it does: Get notified when screen capture of app's windows is attempted
+- Protection: normal
+- Use case: DRM content, security-sensitive apps
+
+DETECT_SCREEN_RECORDING
+- What it does: Get notified when app is being recorded
+- Protection: normal
+- Use case: DRM content, privacy-sensitive apps
+
+LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE
+- What it does: Capture screen content for note-taking via ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE
+- Protection: internal|role (ROLE_NOTES only)
+- Use case: Note-taking apps with screen capture
+
+## SETTINGS & SYSTEM CONFIGURATION PERMISSIONS
+
+WRITE_SETTINGS
+- What it does: Modify system settings (brightness, volume, etc.)
+- Protection: signature|preinstalled|appop|pre23 (requires user approval)
+- Use case: Automation apps, quick settings
+
+WRITE_SECURE_SETTINGS
+- What it does: Read or write secure system settings
+- Protection: signature|privileged|development
+- Use case: System configuration, developer tools
+
+READ_PRIVILEGED_PHONE_STATE
+- What it does: Read privileged phone state information
+- Protection: signature|privileged (system apps only)
+- Use case: System telephony services
+
+LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK
+- What it does: Show Activity embedded in Settings app via ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY
+- Protection: signature (system apps only)
+- Use case: System settings integration
+
+READ_SETTINGS_PREFERENCE
+- What it does: Access Settings Preference services to read settings exposed by Settings app
+- Protection: signature|privileged (system apps only)
+- Use case: System settings reading
+
+WRITE_SETTINGS_PREFERENCE
+- What it does: Access Settings Preference services to write settings values
+- Protection: signature|privileged (system apps only)
+- Use case: System settings modification
+
+## SYNC & BACKUP PERMISSIONS
+
+READ_SYNC_SETTINGS
+- What it does: Read sync settings (auto-sync status)
+- Protection: normal
+- Use case: Sync management apps
+
+WRITE_SYNC_SETTINGS
+- What it does: Write sync settings
+- Protection: normal
+- Use case: Sync management apps
+
+READ_SYNC_STATS
+- What it does: Read sync statistics
+- Protection: normal
+- Use case: Sync monitoring apps
+
+## APN & CARRIER PERMISSIONS
+
+WRITE_APN_SETTINGS
+- What it does: Write APN settings and read sensitive fields (user/password) of existing APNs
+- Protection: signature|privileged (system apps only)
+- Use case: Carrier configuration apps
+
+CHANGE_COMPONENT_ENABLED_STATE
+- What it does: Change whether application component is enabled
+- Protection: signature|privileged (system apps only)
+- Use case: System component management
+
+ACCESS_CHECKIN_PROPERTIES
+- What it does: Read/write "properties" table in checkin database
+- Protection: signature|privileged (system apps only)
+- Use case: System telemetry
+
+## GLOBAL SEARCH & ASSIST
+
+GLOBAL_SEARCH
+- What it does: Allow global search system to access provider data
+- Protection: signature|privileged (system apps only)
+- Use case: System search indexing
+
+EXECUTE_APP_ACTION
+- What it does: Allow assistive app to perform actions on behalf of users inside apps
+- Protection: internal|role (ASSISTANT role only)
+- Use case: Google Assistant, voice assistants
+
+EXECUTE_APP_FUNCTIONS
+- What it does: Allow app to perform actions on behalf of users inside apps
+- Protection: internal|privileged
+- Use case: Privileged system apps
+
+## DEVICE LOCK (FINANCED DEVICES)
+
+MANAGE_DEVICE_LOCK_STATE
+- What it does: Financed device kiosk apps perform actions on Device Lock service
+- Protection: internal|role (FINANCED_DEVICE_KIOSK role only)
+- Use case: Device financing/kiosk mode
+
+## RANGING PERMISSIONS
+
+UWB_RANGING
+- What it does: Range to devices using ultra-wideband
+- Protection: dangerous
+- Use case: Precise device location, digital car keys
+
+GENERIC_RANGING
+- What it does: Range to devices using generic ranging module
+- Protection: dangerous
+- Use case: Device proximity detection
+
+## ADVANCED QUERY PERMISSIONS
+
+QUERY_NEARBY_STREAMING_POLICY
+- What it does: Read nearby streaming policy
+- Protection: signature|privileged (system apps only)
+- Use case: System streaming management
+
+QUERY_DEVICE_ADVANCED_PROTECTION
+- What it does: Query device's advanced protection mode status
+- Protection: signature|privileged (system apps only)
+- Use case: Security status checking
+
+QUERY_ASSISTANT_APP_GLOBAL_DATA
+- What it does: Query over global AppSearch data visible to ASSISTANT role
+- Protection: signature|privileged (system apps only)
+- Use case: Assistant app data access
+
+QUERY_HOME_APP_GLOBAL_DATA
+- What it does: Query over global AppSearch data visible to HOME role
+- Protection: signature|privileged (system apps only)
+- Use case: Launcher data access
+
+## SCREEN LOCK & KEYGUARD PERMISSIONS
+
+REQUEST_PASSWORD_COMPLEXITY
+- What it does: Request screen lock complexity and prompt users to update it
+- Protection: normal
+- Use case: Security-conscious apps
+
+SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE
+- What it does: Subscribe to device locked and keyguard locked state
+- Protection: signature|privileged (system apps only)
+- Use case: System lock state monitoring
+
+## PICTURE-IN-PICTURE PERMISSIONS
+
+ENTER_PICTURE_IN_PICTURE_ON_HIDE
+- What it does: Enter Picture-in-Picture when user doesn't explicitly request it
+- Protection: signature|privileged (system apps only)
+- Use case: System PiP behavior
+
+## SERVICE BINDING PERMISSIONS (All signature/privileged level)
+
+BIND_ACCESSIBILITY_SERVICE
+- What it does: Required by AccessibilityService - ensures only system can bind
+- Protection: signature
+- Use case: Accessibility service implementations
+
+BIND_APP_FUNCTION_SERVICE
+- What it does: Required by AppFunctionService - ensures only system can bind
+- Protection: signature
+- Use case: App function service implementations
+
+BIND_AUTOFILL_SERVICE
+- What it does: Required by AutofillService - ensures only system can bind
+- Protection: signature
+- Use case: Password/form autofill services
+
+BIND_CALL_REDIRECTION_SERVICE
+- What it does: Required by CallRedirectionService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: Call redirect/screening services
+
+BIND_CARRIER_SERVICES
+- What it does: System process binding to carrier app services
+- Protection: signature|privileged
+- Use case: Carrier service implementations
+
+BIND_CARRIER_MESSAGING_CLIENT_SERVICE
+- What it does: Required by CarrierMessagingClientService subclass
+- Protection: signature
+- Use case: Carrier messaging services
+
+BIND_CARRIER_MESSAGING_SERVICE (DEPRECATED API 23)
+- What it does: Use BIND_CARRIER_SERVICES instead
+- Protection: deprecated
+- Use case: Legacy carrier messaging
+
+BIND_CHOOSER_TARGET_SERVICE (DEPRECATED API 30)
+- What it does: Required by ChooserTargetService (use direct share targets instead)
+- Protection: signature (deprecated)
+- Use case: Legacy direct share
+
+BIND_COMPANION_DEVICE_SERVICE
+- What it does: Required by CompanionDeviceService - ensures only system can bind
+- Protection: signature
+- Use case: Companion device services
+
+BIND_CONDITION_PROVIDER_SERVICE
+- What it does: Required by ConditionProviderService - ensures only system can bind
+- Protection: signature
+- Use case: Do Not Disturb condition providers
+
+BIND_CONTROLS
+- What it does: SystemUI request third party controls (ControlsProviderService)
+- Protection: signature
+- Use case: Device control services (smart home controls)
+
+BIND_CREDENTIAL_PROVIDER_SERVICE
+- What it does: Required by CredentialProviderService - ensures only system can bind
+- Protection: signature
+- Use case: Credential provider services
+
+BIND_DEVICE_ADMIN
+- What it does: Required by device admin receiver - ensures only system can interact
+- Protection: signature
+- Use case: Device policy management
+
+BIND_DREAM_SERVICE
+- What it does: Required by DreamService (screensavers) - ensures only system can bind
+- Protection: signature
+- Use case: Daydream/screensaver implementations
+
+BIND_INCALL_SERVICE
+- What it does: Required by InCallService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: Call UI implementations
+
+BIND_INPUT_METHOD
+- What it does: Required by InputMethodService (keyboards) - ensures only system can bind
+- Protection: signature
+- Use case: Keyboard/IME implementations
+
+BIND_MIDI_DEVICE_SERVICE
+- What it does: Required by MidiDeviceService - ensures only system can bind
+- Protection: signature
+- Use case: MIDI device services
+
+BIND_NFC_SERVICE
+- What it does: Required by OffHostApduService or HostApduService - ensures only system can bind
+- Protection: signature
+- Use case: NFC card emulation services
+
+BIND_NOTIFICATION_LISTENER_SERVICE
+- What it does: Required by NotificationListenerService - ensures only system can bind
+- Protection: signature
+- Use case: Notification access services
+
+BIND_PRINT_SERVICE
+- What it does: Required by PrintService - ensures only system can bind
+- Protection: signature
+- Use case: Print service implementations
+
+BIND_QUICK_ACCESS_WALLET_SERVICE
+- What it does: Required by QuickAccessWalletService - ensures only system can bind
+- Protection: signature
+- Use case: Quick access wallet implementations
+
+BIND_QUICK_SETTINGS_TILE
+- What it does: Bind to third party quick settings tiles (TileService)
+- Protection: signature
+- Use case: Quick settings tile implementations
+
+BIND_REMOTEVIEWS
+- What it does: Required by RemoteViewsService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: App widget remote views
+
+BIND_SCREENING_SERVICE
+- What it does: Required by CallScreeningService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: Call screening implementations
+
+BIND_TELECOM_CONNECTION_SERVICE
+- What it does: Required by ConnectionService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: Telephony connection services
+
+BIND_TEXT_SERVICE
+- What it does: Required by TextService (SpellCheckerService) - ensures only system can bind
+- Protection: signature
+- Use case: Spell checker implementations
+
+BIND_TV_AD_SERVICE
+- What it does: Required by TvAdService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: TV advertising services
+
+BIND_TV_INPUT
+- What it does: Required by TvInputService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: TV input implementations
+
+BIND_TV_INTERACTIVE_APP
+- What it does: Required by TvInteractiveAppService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: Interactive TV app services
+
+BIND_VISUAL_VOICEMAIL_SERVICE
+- What it does: Required by VisualVoicemailService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: Visual voicemail implementations
+
+BIND_VOICE_INTERACTION
+- What it does: Required by VoiceInteractionService - ensures only system can bind
+- Protection: signature
+- Use case: Voice interaction/assistant services
+
+BIND_VPN_SERVICE
+- What it does: Required by VpnService - ensures only system can bind
+- Protection: signature
+- Use case: VPN implementations
+
+BIND_VR_LISTENER_SERVICE
+- What it does: Required by VrListenerService - ensures only system can bind
+- Protection: signature
+- Use case: VR mode listener services
+
+BIND_WALLPAPER
+- What it does: Required by WallpaperService - ensures only system can bind
+- Protection: signature|privileged
+- Use case: Live wallpaper implementations
+
+## DEVICE POLICY MANAGEMENT PERMISSIONS (All internal|role - DEVICE_POLICY_MANAGEMENT)
+
+All of these permissions are intended for use by apps with the DEVICE_POLICY_MANAGEMENT role (enterprise/MDM solutions). Many require cross-user permissions to operate on users different from the calling user.
+
+MANAGE_DEVICE_POLICY_ACCESSIBILITY
+- What it does: Manage policy related to accessibility features
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise accessibility policies
+
+MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT
+- What it does: Set policy related to account management
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise account restrictions
+
+MANAGE_DEVICE_POLICY_ACROSS_USERS
+- What it does: Set device policies across users without accessing user data
+- Protection: internal|role
+- Use case: Enterprise cross-user management (no user data)
+
+MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- What it does: Set device policies across all users including user data access
+- Protection: internal|role
+- Use case: Enterprise cross-user management (full access)
+
+MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL
+- What it does: Set security-critical policies across users
+- Protection: internal|role
+- Use case: Enterprise security policies across users
+
+MANAGE_DEVICE_POLICY_AIRPLANE_MODE
+- What it does: Set policy related to airplane mode
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise airplane mode control
+
+MANAGE_DEVICE_POLICY_APPS_CONTROL
+- What it does: Manage policy regarding modifying applications
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise app installation/removal policies
+
+MANAGE_DEVICE_POLICY_APP_FUNCTIONS
+- What it does: Manage policy related to AppFunctions
+- Protection: internal|role
+- Use case: Enterprise app function restrictions
+
+MANAGE_DEVICE_POLICY_APP_RESTRICTIONS
+- What it does: Manage application restrictions
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise app configuration/restrictions
+
+MANAGE_DEVICE_POLICY_APP_USER_DATA
+- What it does: Manage policy related to application user data
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise app data management
+
+MANAGE_DEVICE_POLICY_ASSIST_CONTENT
+- What it does: Set policy for sending assist content to privileged apps (like Assistant)
+- Protection: internal|role
+- Use case: Enterprise assistant data policies
+
+MANAGE_DEVICE_POLICY_AUDIO_OUTPUT
+- What it does: Set policy related to audio output
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise audio routing policies
+
+MANAGE_DEVICE_POLICY_AUTOFILL
+- What it does: Set policy related to autofill
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise autofill restrictions
+
+MANAGE_DEVICE_POLICY_BACKUP_SERVICE
+- What it does: Manage backup service policy
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise backup policies
+
+MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL
+- What it does: Manage policy to block package uninstallation
+- Protection: internal|role
+- Use case: Enterprise app protection
+
+MANAGE_DEVICE_POLICY_BLUETOOTH
+- What it does: Set policy related to bluetooth
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise bluetooth restrictions
+
+MANAGE_DEVICE_POLICY_BUGREPORT
+- What it does: Request bugreports with user consent
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise bug reporting
+
+MANAGE_DEVICE_POLICY_CALLS
+- What it does: Manage calling policy
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise call restrictions
+
+MANAGE_DEVICE_POLICY_CAMERA
+- What it does: Set policy restricting camera use
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise camera disable policies
+
+MANAGE_DEVICE_POLICY_CAMERA_TOGGLE
+- What it does: Manage policy related to camera toggle
+- Protection: internal|role
+- Use case: Enterprise camera toggle control
+
+MANAGE_DEVICE_POLICY_CERTIFICATES
+- What it does: Set policy related to certificates
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise certificate management
+
+MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE
+- What it does: Manage policy related to Common Criteria mode
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise Common Criteria compliance
+
+MANAGE_DEVICE_POLICY_CONTENT_PROTECTION
+- What it does: Manage policy related to content protection
+- Protection: internal|role
+- Use case: Enterprise DRM/content policies
+
+MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES
+- What it does: Manage debugging features policy
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise developer options control
+
+MANAGE_DEVICE_POLICY_DEFAULT_SMS
+- What it does: Set policy for default SMS application
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise default app policies
+
+MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS
+- What it does: Manage policy related to device identifiers (IMEI, serial)
+- Protection: internal|role
+- Use case: Enterprise device tracking
+
+MANAGE_DEVICE_POLICY_DISPLAY
+- What it does: Set policy related to display
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise display settings
+
+MANAGE_DEVICE_POLICY_FACTORY_RESET
+- What it does: Set policy related to factory reset
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise factory reset control
+
+MANAGE_DEVICE_POLICY_FUN
+- What it does: Set policy related to "fun" features
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise entertainment restrictions
+
+MANAGE_DEVICE_POLICY_INPUT_METHODS
+- What it does: Set policy related to input methods (keyboards)
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise keyboard restrictions
+
+MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES
+- What it does: Manage installing from unknown sources policy
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL
+- Protection: internal|role
+- Use case: Enterprise sideloading control
+
+MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES
+- What it does: Set policy for keeping uninstalled packages
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise app reinstallation prevention
+
+MANAGE_DEVICE_POLICY_KEYGUARD
+- What it does: Manage policy related to keyguard (lock screen)
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL
+- Protection: internal|role
+- Use case: Enterprise lock screen policies
+
+MANAGE_DEVICE_POLICY_LOCALE
+- What it does: Set policy related to locale/language
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise language restrictions
+
+MANAGE_DEVICE_POLICY_LOCATION
+- What it does: Set policy related to location
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise location policies
+
+MANAGE_DEVICE_POLICY_LOCK
+- What it does: Lock profile or device
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise remote lock
+
+MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS
+- What it does: Set policy for lock credentials (PIN, password, pattern)
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL
+- Protection: internal|role
+- Use case: Enterprise password requirements
+
+MANAGE_DEVICE_POLICY_LOCK_TASK
+- What it does: Manage lock task policy (kiosk mode)
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise kiosk mode
+
+MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS
+- What it does: Set policy for admin-downloaded subscriptions
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise eSIM management
+
+MANAGE_DEVICE_POLICY_METERED_DATA
+- What it does: Manage policy related to metered data
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise data usage policies
+
+MANAGE_DEVICE_POLICY_MICROPHONE
+- What it does: Set policy restricting microphone use
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise microphone disable policies
+
+MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE
+- What it does: Manage policy related to microphone toggle
+- Protection: internal|role
+- Use case: Enterprise microphone toggle control
+
+MANAGE_DEVICE_POLICY_MOBILE_NETWORK
+- What it does: Set policy related to mobile networks
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise cellular restrictions
+
+MANAGE_DEVICE_POLICY_MODIFY_USERS
+- What it does: Manage policy preventing user modifications
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise user management restrictions
+
+MANAGE_DEVICE_POLICY_MTE
+- What it does: Manage policy for Memory Tagging Extension
+- Protection: internal|role
+- Use case: Enterprise memory security policies
+
+MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION
+- What it does: Set policy for nearby communications (Beam, streaming)
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise proximity sharing restrictions
+
+MANAGE_DEVICE_POLICY_NETWORK_LOGGING
+- What it does: Set policy related to network logging
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise network monitoring
+
+MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY
+- What it does: Manage identity of managing organization
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise branding/identity
+
+MANAGE_DEVICE_POLICY_OVERRIDE_APN
+- What it does: Set policy for override APNs
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise APN management
+
+MANAGE_DEVICE_POLICY_PACKAGE_STATE
+- What it does: Set policy for hiding and suspending packages
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise app visibility control
+
+MANAGE_DEVICE_POLICY_PHYSICAL_MEDIA
+- What it does: Set policy related to physical media (USB, SD cards)
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise removable storage restrictions
+
+MANAGE_DEVICE_POLICY_PRINTING
+- What it does: Set policy related to printing
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise printing restrictions
+
+MANAGE_DEVICE_POLICY_PRIVATE_DNS
+- What it does: Set policy related to Private DNS
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise DNS configuration
+
+MANAGE_DEVICE_POLICY_PROFILES
+- What it does: Set policy related to profiles (work/personal)
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise profile management
+
+MANAGE_DEVICE_POLICY_PROFILE_INTERACTION
+- What it does: Set policy for cross-profile interaction
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise work/personal separation
+
+MANAGE_DEVICE_POLICY_PROXY
+- What it does: Set network-independent global HTTP proxy
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise proxy configuration
+
+MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES
+- What it does: Query system updates
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise update monitoring
+
+MANAGE_DEVICE_POLICY_RESET_PASSWORD
+- What it does: Force set new device password or managed profile challenge
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise password reset
+
+MANAGE_DEVICE_POLICY_RESTRICT_PRIVATE_DNS
+- What it does: Set policy restricting Private DNS configuration
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise DNS restriction
+
+MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS
+- What it does: Set grant state of runtime permissions
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise permission management
+
+MANAGE_DEVICE_POLICY_RUN_IN_BACKGROUND
+- What it does: Set policy for users running in background
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise background user restrictions
+
+MANAGE_DEVICE_POLICY_SAFE_BOOT
+- What it does: Manage safe boot policy
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise safe mode restrictions
+
+MANAGE_DEVICE_POLICY_SCREEN_CAPTURE
+- What it does: Set policy related to screen capture
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS
+- Protection: internal|role
+- Use case: Enterprise screenshot restrictions
+
+MANAGE_DEVICE_POLICY_SCREEN_CONTENT
+- What it does: Set policy for screen content usage
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise screen sharing restrictions
+
+MANAGE_DEVICE_POLICY_SECURITY_LOGGING
+- What it does: Set policy related to security logging
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise security audit logging
+
+MANAGE_DEVICE_POLICY_SETTINGS
+- What it does: Set policy related to settings
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise settings restrictions
+
+MANAGE_DEVICE_POLICY_SMS
+- What it does: Set policy related to SMS
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise SMS restrictions
+
+MANAGE_DEVICE_POLICY_STATUS_BAR
+- What it does: Set policy related to status bar
+- Protection: internal|role
+- Use case: Enterprise status bar restrictions
+
+MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE
+- What it does: Set support messages for policy-affected user actions
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise help messages
+
+MANAGE_DEVICE_POLICY_SUSPEND_PERSONAL_APPS
+- What it does: Set policy for suspending personal apps
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise work/life balance features
+
+MANAGE_DEVICE_POLICY_SYSTEM_APPS
+- What it does: Manage policy related to system apps
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise system app control
+
+MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS
+- What it does: Set policy related to system dialogs
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise dialog restrictions
+
+MANAGE_DEVICE_POLICY_SYSTEM_UPDATES
+- What it does: Set policy related to system updates
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise update policies
+
+MANAGE_DEVICE_POLICY_THREAD_NETWORK
+- What it does: Set policy related to Thread network
+- Protection: internal|role
+- Use case: Enterprise Thread network management
+
+MANAGE_DEVICE_POLICY_TIME
+- What it does: Manage device policy relating to time
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise time/timezone policies
+
+MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING
+- What it does: Set policy related to USB data signalling
+- Protection: internal|role
+- Use case: Enterprise USB data restrictions
+
+MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER
+- What it does: Set policy related to USB file transfers
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise USB transfer restrictions
+
+MANAGE_DEVICE_POLICY_USERS
+- What it does: Set policy related to users
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise user management
+
+MANAGE_DEVICE_POLICY_VPN
+- What it does: Set policy related to VPNs
+- Cross-user: Requires MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
+- Protection: internal|role
+- Use case: Enterprise VPN configuration

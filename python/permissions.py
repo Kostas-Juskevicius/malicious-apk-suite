@@ -157,22 +157,22 @@ for perm in all_permissions:
 
 
 # Results
-print(f"TOTAL: {len(normal_permissions)} normal, {len(dangerous_permissions)} dangerous, {len(signature_permissions)} signature")
+print(f"TOTAL: {len(dangerous_permissions)} dangerous, {len(signature_permissions)} signature, {len(normal_permissions)} normal\n")
 
 if normal_permissions:
     print("[*] NORMAL PERMISSIONS (granted automatically)")
     for perm in normal_permissions:
-        print(f"[*] {perm}")
+        print(f"\t[*] {perm}")
     print()
 
 if dangerous_permissions:
     print("[*] DANGEROUS PERMISSIONS (require user approval)")
     for perm in dangerous_permissions:
-        print(f"[*] {perm}")
+        print(f"\t[*] {perm}")
     print()
 
 if signature_permissions:
     print("[*] SIGNATURE PERMISSIONS (require signature match - so usually needs to be system app)")
     for perm in signature_permissions:
-        print(f"[*] {perm}")
+        print(f"\t[*] {perm}")
     print()
