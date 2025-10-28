@@ -38,7 +38,7 @@ echo -e "[*] SEARCHING FOR SUSPICIOUS RESOURCES...\n"
 
 echo -e "[*] SEARCHING FOR STRINGS IN SUSPICIOUS RESOURCES...\n"
 if [ -f "suspicious_resources_for_strings.txt" ]; then
-    ./python/resource_strings.py > results/strings.txt
+    ./python/strings.py > results/strings.txt
 else
     echo "[*] No suspicious resource list found. Skipping focused strings analysis." > results/strings.txt
 fi
