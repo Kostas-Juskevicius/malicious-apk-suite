@@ -281,7 +281,6 @@ class ResultViewer(QMainWindow):
         
     def init_ui(self):
         self.setWindowTitle("APK Analysis Results")
-        self.setGeometry(100, 100, 1200, 800)
         
         # Dark theme
         self.set_dark_theme()
@@ -577,7 +576,7 @@ def main():
     results_dir = sys.argv[1] if len(sys.argv) > 1 else "results"
     
     viewer = ResultViewer(results_dir)
-    viewer.show()
+    viewer.showMaximized()
     
     sys.exit(app.exec())
 
