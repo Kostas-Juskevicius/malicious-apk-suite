@@ -243,10 +243,11 @@ def main():
             for reason in res["reasons"]:
                 print(f"    [*] WARNING: {reason}")
             found_count += 1
+            print()
 
     # Print summary line if any files were found
     if found_count > 0:
-        print(f"TOTAL: {found_count} suspicious files found out of {total_files} scanned.")
+        print(f"[*] TOTAL: {found_count} suspicious files found out of {total_files} scanned.")
 
 if __name__ == "__main__":
     main()
