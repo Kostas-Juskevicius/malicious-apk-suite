@@ -7,7 +7,7 @@ IGNORABLE_COMPONENTS = [
     "com.google.android.gms",
     "com.google.firebase",
     "com.google.android.datatransport",
-    "androidx.profileinstaller,"
+    "androidx.profileinstaller",
 ]
 
 DANGEROUS_PERMISSIONS = [
