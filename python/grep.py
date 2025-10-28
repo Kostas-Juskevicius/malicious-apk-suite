@@ -283,7 +283,7 @@ FILE_OPS_PATTERNS = [
     r"File.(?:exists|canRead|canWrite|list|listFiles|newDirectoryStream)",
 ]
 
-COMMAND_EXECUTION_HIGH = [
+COMMAND_EXECUTION_PATTERNS = [
     # Explicit Java/Android process execution APIs
     r"\bRuntime\.getRuntime\s*\(\s*\)\s*\.\s*exec\s*\(",
     r"\bnew\s+ProcessBuilder\s*\(",
