@@ -45,6 +45,12 @@ SMS_PATTERNS = [
     r"\bgetDisplayOriginatingAddress\s*\(",
     r"android\.provider\.Telephony\.Sms",
     r"android\.provider\.Telephony\.Mms",
+    r"getSimOperator",
+    r"Context\.TELEPHONY_SERVICE",
+    r"TelephonyManager",
+    r"WifiManager", # need to turn off wifi for toll fraud. this class can turn off wifi
+    r"Context\.CONNECTIVITY_SERVICE", # this can check for wifi
+    r"Telephpony\.Sms\.getDefaultSmsPackage\(this\)", # note: may be used to read sms in notifications
 ]
 
 CRYPTO_PATTERNS = [
@@ -114,7 +120,7 @@ DROPPER_PATTERNS = [
     r"\bgetPackageInstaller\s*\(",
 ]
 
-SMS_PATTERNS = [
+TELEPHONY_PATTERNS = [
     r"\bSmsManager\b",
     r"\bsendTextMessage\s*\(",
     r"\bsendMultipartTextMessage\s*\(",
@@ -132,6 +138,11 @@ SMS_PATTERNS = [
     r"\bgetDisplayOriginatingAddress\s*\(",
     r"android\.provider\.Telephony\.Sms",
     r"android\.provider\.Telephony\.Mms",
+    r"SMS_RECEIVED_ACTION",
+    r"\.get\(\"pdus\"\)",
+    r"SmsMessage",
+    r"\.getMessageBody",
+    r"\.createFromPdu",
 ]
 
 ACCESSIBILITY_PATTERNS = [
@@ -199,6 +210,7 @@ WEBVIEW_PATTERNS = [
     r"\bonJsAlert\s*\(",
     r"\bonJsConfirm\s*\(",
     r"\bonJsPrompt\s*\(",
+    r"@JavascriptInterface",
 ]
 
 DATA_EXFILTRATION_PATTERNS = [
@@ -411,6 +423,16 @@ IMAGE_PAYLOAD_PATTERNS = [
     r"\brecycle\s*\(",
 ]
 
+# not necessarily malicious
+MISCELANEOUS_PATTERNS = [
+    r"\.setPriority\()",
+    r"\.query\(Uri\.parse", # content resolver query
+    r"registerContentObserver",
+    r"onNotificationPosted",
+    r"NotificationListenerService",
+    r"notification\.extras",
+]
+
 def grep_and_print(label, patterns, exclude_patterns):
     cmd = ["rg", "--json", "--type", "java", "-P"]
     for p in patterns:
@@ -477,7 +499,7 @@ LABELS = [
     ("BASE64", BASE64_PATTERNS, []),
     ("KEY", HARDCODED_KEYS, []),
     ("DROPPER", DROPPER_PATTERNS, []),
-    ("SMS", SMS_PATTERNS, []),
+    ("TELEPHONY", TELEPHONY_PATTERNS, []),
     ("ACCESSIBILITY", ACCESSIBILITY_PATTERNS, []),
     ("STRING CONCATENATION", STRING_CONCATENATION_PATTERNS, []),
     ("WEBVIEW", WEBVIEW_PATTERNS, []), 
@@ -490,6 +512,7 @@ LABELS = [
     ("NATIVE", NATIVE_PATTERNS, ["synthetic"]),
     ("LOG", LOGGING_PATTERNS, []),
     ("SERVICE PERSISTENCE", PERSISTENT_SERVICE_PATTERNS, []),
+    ("MISCELANEOUS", MISCELANEOUS_PATTERNS, []),
 ]
  
 for label, patterns, exclude in LABELS:
