@@ -6,7 +6,27 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget, QPushButton,
     QLineEdit, QLabel, QMessageBox
 )
-from PyQt6.QtGui import QFont, QColor, QPalette, QTextCursor, QTextDocument
+from PyQt6.QtGui import QFont, QColor, QPalette, QTextCursor, QShortcut, QKeySequence, QTextDocument, QTextCharFormat
+from PyQt6.QtCore import Qt, QEvent
+
+class HorizontalScrollFilter(QEvent):
+    """Event filter for shift+scroll horizontal scrolling"""
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Type.Wheel:
+            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                # Get the text edit widget
+                text_edit = self.parent
+                h_scroll = text_edit.horizontalScrollBar()
+                
+                # Scroll horizontally
+                delta = event.angleDelta().y()
+                h_scroll.setValue(h_scroll.value() - delta)
+                return True
+        return False
 
 class ResultViewer(QMainWindow):
     def __init__(self, results_dir="results"):
@@ -42,6 +62,11 @@ class ResultViewer(QMainWindow):
         self.search_box = QLineEdit()
         self.search_box.setPlaceholderText("Search in current tab...")
         self.search_box.returnPressed.connect(self.find_next)
+        self.search_box.textChanged.connect(self.on_search_changed)
+        
+        # Ctrl+F focuses search
+        search_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
+        search_shortcut.activated.connect(self.focus_search)
         
         # Navigation buttons
         self.prev_btn = QPushButton("◄ Previous")
@@ -69,6 +94,11 @@ class ResultViewer(QMainWindow):
         
         # Status bar
         self.statusBar().showMessage("Ready")
+        
+    def focus_search(self):
+        """Focus search box and select all text"""
+        self.search_box.setFocus()
+        self.search_box.selectAll()
         
     def set_dark_theme(self):
         """Apply dark theme"""
@@ -149,8 +179,12 @@ class ResultViewer(QMainWindow):
             text_edit = QTextEdit()
             text_edit.setReadOnly(True)
             text_edit.setPlainText(content)
-            text_edit.setFont(QFont("Courier New", 20))
+            text_edit.setFont(QFont("Courier New", 14))
             text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+            
+            # Add horizontal scroll filter
+            scroll_filter = HorizontalScrollFilter(text_edit)
+            text_edit.viewport().installEventFilter(scroll_filter)
             
             # Store reference
             self.cheatsheet_widget = text_edit
@@ -197,12 +231,16 @@ class ResultViewer(QMainWindow):
                 self.results[name] = content
                 self.original_contents[name] = content
                 
-                # Create tab with text widget - bigger font
+                # Create tab with text widget
                 text_edit = QTextEdit()
                 text_edit.setReadOnly(True)
                 text_edit.setPlainText(content)
-                text_edit.setFont(QFont("Courier New", 20))
+                text_edit.setFont(QFont("Courier New", 14))
                 text_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+                
+                # Add horizontal scroll filter
+                scroll_filter = HorizontalScrollFilter(text_edit)
+                text_edit.viewport().installEventFilter(scroll_filter)
                 
                 # Store reference
                 self.text_widgets[name] = text_edit
@@ -223,6 +261,40 @@ class ResultViewer(QMainWindow):
             text = current_widget.toPlainText()
             QApplication.clipboard().setText(text)
             self.statusBar().showMessage("✓ Copied to clipboard!", 3000)
+    
+    def highlight_all_matches(self, text_edit, search_text):
+        """Highlight all occurrences of search text"""
+        if not search_text:
+            text_edit.setExtraSelections([])
+            return
+        
+        extra_selections = []
+        
+        # Create highlight format
+        highlight_format = QTextCharFormat()
+        highlight_format.setBackground(QColor(255, 165, 0, 100))  # Semi-transparent orange
+        
+        # Search and highlight all matches
+        cursor = QTextCursor(text_edit.document())
+        cursor.movePosition(QTextCursor.MoveOperation.Start)
+        
+        while True:
+            cursor = text_edit.document().find(search_text, cursor)
+            if cursor.isNull():
+                break
+            
+            selection = QTextEdit.ExtraSelection()
+            selection.cursor = cursor
+            selection.format = highlight_format
+            extra_selections.append(selection)
+        
+        text_edit.setExtraSelections(extra_selections)
+    
+    def on_search_changed(self, text):
+        """Called when search text changes"""
+        current_widget = self.tabs.currentWidget()
+        if current_widget and isinstance(current_widget, QTextEdit):
+            self.highlight_all_matches(current_widget, text)
         
     def find_next(self):
         """Find next occurrence of search text"""
@@ -279,8 +351,12 @@ class ResultViewer(QMainWindow):
             self.statusBar().showMessage("")
         
     def on_tab_changed(self, index):
-        """Handle tab change"""
-        pass
+        """Handle tab change - re-highlight matches in new tab"""
+        search_text = self.search_box.text()
+        if search_text:
+            current_widget = self.tabs.currentWidget()
+            if current_widget and isinstance(current_widget, QTextEdit):
+                self.highlight_all_matches(current_widget, search_text)
 
 
 def main():
