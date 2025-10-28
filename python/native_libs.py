@@ -50,6 +50,7 @@ def pick_target_so(resources_dir: Path):
     lib_dir = resources_dir / "lib"
     if not lib_dir.exists():
         print("[*] NO LIBRARY FOLDER FOUND — SKIPPING NATIVE ANALYSIS\n")
+        sys.stdout.flush()
         return None
 
     arm64_dir = lib_dir / "arm64-v8a"
@@ -64,6 +65,7 @@ def pick_target_so(resources_dir: Path):
         return all_sos[0]
 
     print("[*] NO .SO FILES FOUND IN LIB FOLDER — NOTHING TO ANALYZE\n")
+    sys.stdout.flush()
     return None
 
 
@@ -122,6 +124,7 @@ def main():
 
     target_so = pick_target_so(resources_dir)
     if not target_so:
+        sys.stdout.flush()
         return
 
     analyze_lib(target_so)

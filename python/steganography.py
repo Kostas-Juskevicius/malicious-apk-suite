@@ -255,12 +255,14 @@ def print_report(results: list[dict]):
     total_n = len(normal) + len(suspicious)
 
     print(f"TOTAL: {total_d} dangerous, {total_sg} signature, {total_n} normal\n")
+    sys.stdout.flush()
 
     print("[*] NORMAL (including suspicious)")
     for r in normal + suspicious:
         size = pretty_bytes(r["filesize"])
         print(f"\t[*] {r['path']} ({r['magic']}) — {size}")
     print()
+    sys.stdout.flush()
 
     print("[*] SIGNATURE FILES (require signature match - likely system/repackaged)")
     for r in signature:
@@ -270,6 +272,7 @@ def print_report(results: list[dict]):
         if reasons:
             print(f"\t\t-> reason: {reasons}")
     print()
+    sys.stdout.flush()
 
     print("[*] DANGEROUS FILES")
     for r in dangerous:
@@ -282,6 +285,7 @@ def print_report(results: list[dict]):
         if reasons:
             print(f"\t\t-> reason: {reasons}")
     print()
+    sys.stdout.flush()
 
 if __name__ == "__main__":
     root = sys.argv[1] if len(sys.argv) > 1 else "."
