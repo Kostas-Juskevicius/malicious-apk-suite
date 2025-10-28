@@ -93,8 +93,8 @@ def bytes_per_pixel(filesize: int, w: int | None, h: int | None) -> float | None
     pixels = w * h
     return filesize / pixels
 
-def scan_for_embedded(path: str) -> list[tuple[str, int]]:
-    """Scan file head and tail for embedded signatures."""
+def scan_for_embedded(path: str, primary_magic: str | None) -> list[tuple[str, int]]:
+    """Scan file head and tail for embedded signatures, excluding the primary one at offset 0."""
     size = os.path.getsize(path)
     if size == 0:
         return []
@@ -105,7 +105,13 @@ def scan_for_embedded(path: str) -> list[tuple[str, int]]:
         for sig, name in MAGICS:
             # Check if signature is at the very beginning
             if head.startswith(sig) and len(sig) > 2:
-                embedded.append((name, 0))
+                # Only add if it's NOT the primary magic detected for the file at offset 0
+                if not (name == primary_magic and f.tell() == len(sig)): # f.tell() is misleading here, just check offset 0 logic
+                # Simpler: if the name found at offset 0 matches the primary_magic passed in, don't add it.
+                    if not (name == primary_magic and 0 == 0): # This condition is always true if name matches primary_magic
+                        if name != primary_magic: # This is the correct check
+                            embedded.append((name, 0))
+                        # else: it's the primary signature, skip it
         # Scan tail for signatures
         if size > HEADER_READ:
             f.seek(max(0, size - TAIL_SCAN))
@@ -115,8 +121,8 @@ def scan_for_embedded(path: str) -> list[tuple[str, int]]:
                 if pos != -1:
                     # Calculate absolute offset in the file
                     offset = size - len(tail) + pos
-                    # Avoid double-counting if the signature was also at the head (offset 0)
-                    if offset != 0:
+                    # Add if it's not at offset 0 (or if it is, only if it's different from primary magic, which is handled above for head)
+                    if offset != 0: # This already excludes offset 0 found in the tail, which is correct as head covers offset 0
                         embedded.append((name, offset))
     return embedded
 
@@ -178,8 +184,8 @@ def analyze_file(path: str) -> dict:
             entry["reasons"].append(f"bytes_per_pixel {bpp:.2f} > {BPP_THRESHOLD} (way too big for pixel dimensions)")
             entry["score"] += 2
 
-    # --- Embedded Signatures Check ---
-    embedded = scan_for_embedded(path)
+    # --- Embedded Signatures Check (PASS the primary magic to filter it) ---
+    embedded = scan_for_embedded(path, entry["magic"])
     entry["embedded"] = embedded
     if embedded:
         for name, offset in embedded:
