@@ -57,8 +57,6 @@ CRYPTO_PATTERNS = [
     r"\bdecrypt\s*\(",
     r"\bencrypt\s*\(",
     r"\bCipher\.getInstance\s*\(",
-    r"javax\.crypto",
-    r"java\.security",
     r"\bSecretKeySpec\b",
     r"\bIvParameterSpec\b",
     r"\bKeyGenerator\b",
@@ -76,7 +74,6 @@ CRYPTO_PATTERNS = [
     r"AES/ECB",
     r"DES/CBC",
     r"RSA/ECB",
-    r"\bgetInstance\s*\(",
     r"\bgenerateKey\s*\(",
     r"\bgenerateKeyPair\s*\(",
     r"\bgetEncoded\s*\(",
@@ -89,8 +86,7 @@ BASE64_PATTERNS = [
     r"getEncoder\(\)",
     r'aHR0cDovL2',  # http:// in base64
     r'aHR0cHM6Ly9',  # https:// in base64
-    r'"[a-zA-Z0-9+/]{5,}={1,2}"',
-    r"'[a-zA-Z0-9+/]{5,}={1,2}'",
+    r"'[a-zA-Z0-9+/]{8,}={1,2}'",
 ]
 
 HARDCODED_KEYS = [
@@ -158,8 +154,6 @@ ACCESSIBILITY_PATTERNS = [
     r"\bfindAccessibilityNodeInfosByViewId\s*\(",
     r"\bgetRootInActiveWindow\s*\(",
     r"\bgetSource\s*\(",
-    r"\bgetText\s*\(",
-    r"\bsetText\s*\(",
     r"\bACTION_CLICK\b",
     r"\bACTION_LONG_CLICK\b",
     r"\bACTION_SCROLL_FORWARD\b",
@@ -182,38 +176,20 @@ ACCESSIBILITY_PATTERNS = [
 ]
 
 STRING_CONCATENATION_PATTERNS = [
-    r'"\s*\+\s*"',
+    r'"."\s*\+\s*"."',
 ]
 
 WEBVIEW_PATTERNS = [
-    r"\bWebView\b",
-    r"\bWebViewClient\b",
-    r"\bWebChromeClient\b",
-    r"\bloadUrl\s*\(",
-    r"\bloadData\s*\(",
-    r"\bloadDataWithBaseURL\s*\(",
     r"\baddJavascriptInterface\s*\(",
-    r"\bsetJavaScriptEnabled\s*\(",
+    r"@JavascriptInterface",
     r"\bevaluateJavascript\s*\(",
-    r"\bsetWebContentsDebuggingEnabled\s*\(",
-    r"\bsetAllowFileAccess\s*\(",
     r"\bsetAllowFileAccessFromFileURLs\s*\(",
     r"\bsetAllowUniversalAccessFromFileURLs\s*\(",
-    r"\bsetAllowContentAccess\s*\(",
-    r"\bsetMixedContentMode\s*\(",
-    r"\bsetDomStorageEnabled\s*\(",
-    r"\bsetDatabaseEnabled\s*\(",
-    r"\bsetGeolocationEnabled\s*\(",
-    r"\bsetAppCacheEnabled\s*\(",
     r"\bonReceivedSslError\s*\(",
-    r"\bshouldOverrideUrlLoading\s*\(",
-    r"\bonJsAlert\s*\(",
-    r"\bonJsConfirm\s*\(",
-    r"\bonJsPrompt\s*\(",
-    r"@JavascriptInterface",
 ]
 
 DATA_EXFILTRATION_PATTERNS = [
+    # Device identifiers
     r"\bgetDeviceId\s*\(",
     r"\bgetSubscriberId\s*\(",
     r"\bgetSimSerialNumber\s*\(",
@@ -222,31 +198,16 @@ DATA_EXFILTRATION_PATTERNS = [
     r"\bgetMeid\s*\(",
     r"\bgetSimCountryIso\s*\(",
     r"\bgetNetworkOperator\s*\(",
+
+    # Accounts
     r"\bgetAccounts\s*\(",
     r"\bgetAccountsByType\s*\(",
-    r"\bContentResolver\b",
-    r"\bquery\s*\(",
+
+    # Sensitive content URIs
     r"content://sms",
     r"content://contacts",
     r"content://call_log",
     r"content://browser",
-    r"\bgetInstalledPackages\s*\(",
-    r"\bgetInstalledApplications\s*\(",
-    r"\bgetRunningAppProcesses\s*\(",
-    r"\bgetRunningTasks\s*\(",
-    r"\bgetRecentTasks\s*\(",
-    r"\bgetLastKnownLocation\s*\(",
-    r"\bgetBestProvider\s*\(",
-    r"\brequestLocationUpdates\s*\(",
-    r"\bgetActiveNetworkInfo\s*\(",
-    r"\bgetAllNetworkInfo\s*\(",
-    r"\bWifiManager\b",
-    r"\bgetConnectionInfo\s*\(",
-    r"\bgetScanResults\s*\(",
-    r"\bBluetoothAdapter\b",
-    r"\bgetBondedDevices\s*\(",
-    r"\bstartDiscovery\s*\(",
-    r"\bgetSystemService\s*\(",
 ]
 
 REFLECTION_PATTERNS = [
@@ -287,60 +248,34 @@ DYNAMIC_LOADING_PATTERNS = [
     r"System\.loadLibrary\s*\(",
 ]
 
-NETWORK_PATTERNS = [
-    # Standard Java HTTP
-    r"\bHttpURLConnection\b",
-    r"\bHttpsURLConnection\b",
-    r"\.openConnection\s*\(",
-    r"\.getInputStream\s*\(",
-    r"\.getOutputStream\s*\(",
-    
-    # Raw sockets
-    r"\bSocket\s*\(",
-    r"\bServerSocket\s*\(",
-    r"\bDatagramSocket\s*\(",
-    r"\bDatagramPacket\s*\(",
-    
-    # OkHttp (very common in malware)
-    r"\bOkHttpClient\b",
-    r"\.newCall\s*\(",
-    r"\bRequest\.Builder\b",
-    
-    # Apache HTTP (legacy but still used)
-    r"\bDefaultHttpClient\b",
-    r"\bHttpPost\b",
-    r"\bHttpGet\b",
-    r"\.execute\s*\(",
-    
-    # WebSockets
-    r"\bWebSocket\b",
-    r"wss?://",
-    
-    # URLs and IPs
-    r"https?://[^\s'\"<>]+",
-    r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b",
-    
-    # SSL/TLS manipulation (common in malware)
-    r"\bTrustManager\b",
+HIGH_SIGNAL_NETWORK = [
+    # Remote targets embedded as string literals (hardcoded URLs / IPs) — high signal
+    r"\"https?://[^\"]+\"",                       # any hardcoded http(s) URL string
+    r"\"(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?\"",      # hardcoded IPv4 (optionally with port)
+
+    # Native execution + process spawn (often used for persistence, tunneling, obfuscation)
+    r"Runtime\.getRuntime\s*\(\s*\)\.exec\b",
+    r"\bProcessBuilder\b",
+
+    # Insecure SSL handling / certificate pinning bypasses
     r"\bX509TrustManager\b",
     r"\bHostnameVerifier\b",
-    r"\.setSSLSocketFactory\s*\(",
-    
-    # Dynamic loading (often used to hide networking)
+    r"(?:implements|new)\s+X509TrustManager",
+    r"HostnameVerifier\s*\{[^}]*\bverify\s*\([^)]*\)\s*\{[^}]*\breturn\s+true\s*;[^}]*\}",
+
+    # Dynamic code loading combined with networking (dex loading is very suspicious if paired with remote fetch)
     r"\bDexClassLoader\b",
     r"\bClass\.forName\s*\(",
-    
-    # Native execution
-    r"Runtime\.getRuntime\s*\(\s*\)\.exec",
-    r"\bProcessBuilder\b",
+
+    # WebSocket usage (commonly used for C2)
+    r"\bWebSocket\b",
+    r"wss?://",
 ]
 
 FILE_OPS_PATTERNS = [
     r"\"java.io.tmpdir\"",
     r"new\s+FileWriter",
     r"Files\.(?:exists|readAllLines|readAllBytes|write|delete|copy|move)",
-    r"FileOutputStream",
-    r"FileInputStream",
     r"FileChannel",
     r"new Scanner\(new File\(",
     r"AsynchronousFileChannel",
@@ -348,26 +283,26 @@ FILE_OPS_PATTERNS = [
     r"File.(?:exists|canRead|canWrite|list|listFiles|newDirectoryStream)",
 ]
 
-COMMAND_EXECUTION_PATTERNS = [
-    r"\bRuntime\.getRuntime\s*\(\)\s*\.\s*exec\s*\(",
-    r"\bProcessBuilder\b",
-    r"\bstart\s*\(",
-    r"\bexec\s*\(",
-    r"\bgetInputStream\s*\(",
-    r"\bgetOutputStream\s*\(",
-    r"\bgetErrorStream\s*\(",
+COMMAND_EXECUTION_HIGH = [
+    # Explicit Java/Android process execution APIs
+    r"\bRuntime\.getRuntime\s*\(\s*\)\s*\.\s*exec\s*\(",
+    r"\bnew\s+ProcessBuilder\s*\(",
+
+    # Process control methods (only match when file also hits exec/ProcessBuilder)
     r"\bwaitFor\s*\(",
-    r"\bdestroy\s*\(",
     r"\bdestroyForcibly\s*\(",
-    r"[\"']/system/bin/sh[\"']",
-    r"[\"']sh[\"']",
-    r"[\"']su[\"']",
-    r"[\"']busybox[\"']",
-    r"[\"']chmod[\"']",
-    r"[\"']chown[\"']",
-    r"[\"']pm\s+install[\"']",
-    r"[\"']pm\s+uninstall[\"']",
-    r"[\"']am\s+start[\"']",
+
+    # Hardcoded absolute shells or binaries (string-literal form)
+    r"['\"](?:/system/bin/sh|/system/xbin/su|/system/bin/su|/sbin/su)['\"]",
+    r"['\"](?:/system/bin/busybox|/system/xbin/busybox|busybox)['\"]",
+
+    # Explicit package manager or activity manager commands (string-literal)
+    r"['\"]pm\s+install(?:\s+-r)?\s+[^\"]+['\"]",
+    r"['\"]pm\s+uninstall\s+[^\"]+['\"]",
+    r"['\"]am\s+start\b[^\"]*['\"]",
+
+    # chmod / chown when used as literal commands (likely for persistence / privilege change)
+    r"['\"](?:chmod|chown)\s+[^\"]+['\"]",
 ]
 
 NATIVE_PATTERNS = [
@@ -486,11 +421,11 @@ def grep_and_print(label, patterns, exclude_patterns):
     if matches_by_file:
         print(f"[*] GREPPING FOR {label}...")
         for filepath, matches in matches_by_file.items():
-            print(f"[*] FOUND IN: {os.path.basename(filepath)}")
+            print(f"\t[*] FOUND IN: {os.path.basename(filepath)}")
             for line_number, line_text in matches:
-                print(f"\t[*] CODE: {line_text}")
-                print(f"\t[*] AT LINE: {line_number}")
-                print(f"\t[*]")
+                print(f"\t\t[*] CODE: {line_text}")
+                print(f"\t\t[*] AT LINE: {line_number}")
+                print(f"\t\t[*]")
         print()
 
 
@@ -503,8 +438,8 @@ LABELS = [
     ("ACCESSIBILITY", ACCESSIBILITY_PATTERNS, []),
     ("STRING CONCATENATION", STRING_CONCATENATION_PATTERNS, []),
     ("WEBVIEW", WEBVIEW_PATTERNS, []), 
-    ("REFLECTION PATTERNS", DATA_EXFILTRATION_PATTERNS, ["/* synthetic */", "/* bridge */"]),
-    ("REFLECTION", REFLECTION_PATTERNS, []),
+    ("DATA EXFILTRATION PATTERNS", DATA_EXFILTRATION_PATTERNS, []),
+    ("REFLECTION", REFLECTION_PATTERNS, ["/* synthetic */", "/* bridge */"]),
     ("DYNAMIC LOADING", DYNAMIC_LOADING_PATTERNS, []),
     ("NETWORK", NETWORK_PATTERNS, []),
     ("COMMAND EXECUTION_PATTERNS", COMMAND_EXECUTION_PATTERNS, []),
@@ -517,4 +452,3 @@ LABELS = [
  
 for label, patterns, exclude in LABELS:
     grep_and_print(label, patterns, exclude)
-print("\n[*] GREPPING COMPLETE\n")
