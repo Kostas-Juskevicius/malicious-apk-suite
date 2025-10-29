@@ -54,29 +54,33 @@ SMS_PATTERNS = [
 ]
 
 CRYPTO_PATTERNS = [
-    r"\bdecrypt\s*\(",
-    r"\bencrypt\s*\(",
-    r"\bCipher\.getInstance\s*\(",
-    r"\bSecretKeySpec\b",
+    # Weak / problematic algorithms or modes (explicit, string-literal)
+    r"\"AES/ECB(?:/PKCS5Padding|/PKCS7Padding)?\"",
+    r"\"DES/ECB(?:/PKCS5Padding)?\"",
+    r"\"RSA/ECB(?:/PKCS1Padding)?\"",
+    r"MessageDigest\.getInstance\s*\(\s*\"(?:MD5|SHA-1|SHA1)\"\s*\)",
+
+    # Hardcoded keys or key material (Base64 of AES key length — 16 bytes -> 24 base64 chars)
+    r"['\"][A-Za-z0-9+/]{24}={0,2}['\"]",   # likely hardcoded 16-byte key (base64)
+    r"['\"][A-Za-z0-9+/]{32,44}={0,2}['\"]",# longer base64 (24/32-byte keys)
+
+    # SecretKeySpec constructed directly from literal bytes/strings (very suspicious)
+    r"new\s+SecretKeySpec\s*\(\s*(?:\"[^\"]+\"|'[^']+'|new\s+byte\s*\[.*\])\s*,",
+    r"\bSecretKeySpec\s*\b",                # kept so we know class is used (but deprioritize alone)
+
+    # Static / hardcoded IVs (byte arrays or literal strings next to IvParameterSpec)
+    r"new\s+IvParameterSpec\s*\(\s*(?:new\s+byte\s*\[.*\]|\s*\"[^\"]+\"|'[^']+')\s*\)",
     r"\bIvParameterSpec\b",
-    r"\bKeyGenerator\b",
-    r"\bKeyPairGenerator\b",
-    r"\bSecretKeyFactory\b",
-    r"\bMessageDigest\b",
-    r"\bMac\.getInstance\s*\(",
-    r"\bdoFinal\s*\(",
-    r"\binit\s*\(",
-    r"\bupdate\s*\(",
-    r"\bPBEKeySpec\b",
-    r"\bSecureRandom\b",
-    r"\bKeyStore\b",
-    r"AES/CBC",
-    r"AES/ECB",
-    r"DES/CBC",
-    r"RSA/ECB",
-    r"\bgenerateKey\s*\(",
-    r"\bgenerateKeyPair\s*\(",
+
+    # Exposing raw key material or exported keys
     r"\bgetEncoded\s*\(",
+
+    # Custom/trusting crypto implementations that indicate bypassing standard protections
+    r"(?:implements|new)\s+X509TrustManager",
+    r"HostnameVerifier\s*\{[^}]*\bverify\s*\([^)]*\)\s*\{[^}]*\breturn\s+true\s*;[^}]*\}",
+
+    # Dynamic crypto APIs that are suspicious when combined with hardcoded keys or dynamic loading
+    r"\bCipher\.getInstance\s*\(",
 ]
 
 BASE64_PATTERNS = [
