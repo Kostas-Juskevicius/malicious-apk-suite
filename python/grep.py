@@ -66,7 +66,6 @@ CRYPTO_PATTERNS = [
 
     # SecretKeySpec constructed directly from literal bytes/strings (very suspicious)
     r"new\s+SecretKeySpec\s*\(\s*(?:\"[^\"]+\"|'[^']+'|new\s+byte\s*\[.*\])\s*,",
-    r"\bSecretKeySpec\s*\b",                # kept so we know class is used (but deprioritize alone)
 
     # Static / hardcoded IVs (byte arrays or literal strings next to IvParameterSpec)
     r"new\s+IvParameterSpec\s*\(\s*(?:new\s+byte\s*\[.*\]|\s*\"[^\"]+\"|'[^']+')\s*\)",
@@ -443,13 +442,13 @@ LABELS = [
     ("STRING CONCATENATION", STRING_CONCATENATION_PATTERNS, []),
     ("WEBVIEW", WEBVIEW_PATTERNS, []), 
     ("DATA EXFILTRATION PATTERNS", DATA_EXFILTRATION_PATTERNS, []),
-    ("REFLECTION", REFLECTION_PATTERNS, ["/* synthetic */", "/* bridge */"]),
+    # ("REFLECTION", REFLECTION_PATTERNS, ["/* synthetic */", "/* bridge */"]),
     ("DYNAMIC LOADING", DYNAMIC_LOADING_PATTERNS, []),
     ("NETWORK", NETWORK_PATTERNS, []),
     ("COMMAND EXECUTION_PATTERNS", COMMAND_EXECUTION_PATTERNS, []),
     ("FILE OPS", FILE_OPS_PATTERNS, []),
     ("NATIVE", NATIVE_PATTERNS, ["/* synthetic */"]),
-    ("LOG", LOGGING_PATTERNS, []),
+    # ("LOG", LOGGING_PATTERNS, []),
     ("SERVICE PERSISTENCE", PERSISTENT_SERVICE_PATTERNS, []),
     ("MISCELANEOUS", MISCELANEOUS_PATTERNS, []),
 ]
